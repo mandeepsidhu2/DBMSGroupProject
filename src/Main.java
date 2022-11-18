@@ -1,10 +1,9 @@
 import controller.HotelManagementSystem;
-import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
 
-  public static void main(String[] args) throws SQLException {
+  public static void main(String[] args) throws Exception {
     HotelManagementSystem hotelManagementSystem = createAppConnection();
     hotelManagementSystem.run();
     System.out.println("\nClosing the connection to database");
@@ -13,24 +12,22 @@ public class Main {
 
   }
 
-  private static HotelManagementSystem createAppConnection(){
+  private static HotelManagementSystem createAppConnection() {
     Scanner reader = new Scanner(System.in);
 
     System.out.println("Please enter the username for the database");
     String username = reader.nextLine();
 
-    String password="";
+    String password = "";
     System.out.println("Please enter the password for the database");
-    password=reader.nextLine();
-
+    password = reader.nextLine();
 
     HotelManagementSystem app;
     try {
-      app = new HotelManagementSystem(username,password);
-    }
-    catch (Exception e){
+      app = new HotelManagementSystem(username, password);
+    } catch (Exception e) {
       System.out.println(e.getMessage());
-      app= createAppConnection();
+      app = createAppConnection();
     }
     return app;
 
