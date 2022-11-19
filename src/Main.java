@@ -15,12 +15,12 @@ public class Main {
   private static HotelManagementSystem createAppConnection() {
     Scanner reader = new Scanner(System.in);
 
-    System.out.println("Please enter the username for the database");
-    String username = reader.nextLine();
-
-    String password = "";
-    System.out.println("Please enter the password for the database");
-    password = reader.nextLine();
+   // System.out.println("Please enter the username for the database");
+  //  String username = reader.nextLine();
+    String username ="root";
+        String password = "";
+//    System.out.println("Please enter the password for the database");
+//    password = reader.nextLine();
 
     HotelManagementSystem app;
     try {

@@ -18,7 +18,7 @@ public class UserModel {
   List<User> getFromIterator(ResultSet resultSetFromProcedure) throws SQLException {
     List<User> list = new ArrayList<>();
     while (resultSetFromProcedure.next()) {
-      Integer customerId = Integer.valueOf(resultSetFromProcedure.getString("customerId"));
+      Integer customerId = Integer.valueOf(resultSetFromProcedure.getString("customer_id"));
       String ssn = resultSetFromProcedure.getString("ssn");
       Integer age = Integer.valueOf(resultSetFromProcedure.getString("age"));
       String phone = resultSetFromProcedure.getString("phone");

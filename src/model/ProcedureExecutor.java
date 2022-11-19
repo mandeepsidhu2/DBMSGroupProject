@@ -41,7 +41,7 @@ public class ProcedureExecutor {
     ResultSet resultSet = null;
     try {
       resultSet = prepareStatementForProcedure.executeQuery();
-      prepareStatementForProcedure.close();
+      //prepareStatementForProcedure.close();
 
     } catch (SQLException sqlException) {
       System.out.println("Cannot fetch data " + sqlException.getMessage());

@@ -1,6 +1,7 @@
 package controller;
 
 import entity.User;
+import entity.User.UserBuilder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -32,7 +33,7 @@ public class HotelManagementSystem {
   /**
    * The name of the database of sharks
    */
-  private final String dbName = "sharkdbsidhum";
+  private final String dbName = "final_project";
   private final View view;
   private final UserModel userModel;
   private final Hotel hotelModel;
@@ -85,7 +86,7 @@ public class HotelManagementSystem {
     System.out.println("Enter ssn");
     String ssn = reader.nextLine();
 
-    System.out.println("Enter ssn");
+    System.out.println("Enter name");
     String name = reader.nextLine();
 
     System.out.println("Enter phone");
@@ -97,6 +98,9 @@ public class HotelManagementSystem {
     System.out.println("Enter age");
     Integer age = inputAnIntFromUser();
 
+    User userToCreate = new UserBuilder().age(age).email(email).phone(phone).name(name).ssn(ssn).build();
+     userModel.createUser(userToCreate);
+    System.out.println("Congratulations, you are now signed up ");
 
   }
 
@@ -106,6 +110,10 @@ public class HotelManagementSystem {
     User user = userModel.getUserBySSN(ssn);
     if (user == null) {
       System.out.println("User doesn't exist please signup");
+      startUserSignupProcess();
+    }
+    else {
+      System.out.println("Congratulations, you are now logged in as "+user.getName());
     }
   }
 
