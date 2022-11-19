@@ -4,23 +4,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
+@SuperBuilder
 public class Hotel {
 
-  public Integer id;
-  public String name;
-  public String street;
-  public String town;
-  public String state;
-  public String zip;
-  public Float avgRating;
-  public String phone;
-  public String email;
+  private Integer id;
+  private String name;
+  private String street;
+  private String town;
+  private String state;
+  private String zip;
+  private Float avgRating;
+  private String phone;
+  private String email;
 
 
 }

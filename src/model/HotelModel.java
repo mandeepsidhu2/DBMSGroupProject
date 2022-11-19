@@ -1,6 +1,8 @@
 package model;
 
 import entity.Hotel;
+import entity.HotelWithAmenities;
+import entity.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,8 +16,8 @@ public class HotelModel {
     this.procedureExecutor = procedureExecutor;
   }
 
-  List<Hotel> getFromIterator(ResultSet resultSetFromProcedure) throws SQLException {
-    List<Hotel> list = new ArrayList<>();
+  List<HotelWithAmenities> getFromIteratorHotelWithAmenities(ResultSet resultSetFromProcedure) throws SQLException {
+    List<HotelWithAmenities> list = new ArrayList<>();
     while (resultSetFromProcedure.next()) {
       String name = resultSetFromProcedure.getString("name");
       String street = resultSetFromProcedure.getString("street");
@@ -26,12 +28,31 @@ public class HotelModel {
       String phone = resultSetFromProcedure.getString("phone");
       String email = resultSetFromProcedure.getString("email");
 
-      Hotel hotel = new Hotel().toBuilder().name(name).avgRating(avgRating).email(email)
+      String amenitiesName = resultSetFromProcedure.getString("amenities");
+      String amenitiesDescription = resultSetFromProcedure.getString("amenitiesDescription");
+
+
+      HotelWithAmenities hotel = new HotelWithAmenities().builder().name(name).avgRating(avgRating).email(email)
           .phone(phone).town(town).state(state).zip(zip).state(state).street(street)
+          .amenities(amenitiesName).amenitiesDescription(amenitiesDescription)
           .build();
       list.add(hotel);
     }
     return list;
+  }
+
+  public List<HotelWithAmenities> getAllAvailableHotelsWithAmenities() {
+    String query = "call getAvailableHotels()";
+    ResultSet resultSet = procedureExecutor.preparedStatement(query).execute();
+    List<HotelWithAmenities> hotelWithAmenities;
+    try {
+      hotelWithAmenities = getFromIteratorHotelWithAmenities(resultSet);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return null;
+    }
+    procedureExecutor.cleanup();
+    return hotelWithAmenities;
   }
 
 }

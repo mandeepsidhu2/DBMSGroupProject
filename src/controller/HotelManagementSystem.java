@@ -1,5 +1,6 @@
 package controller;
 
+import entity.HotelWithAmenities;
 import entity.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -75,6 +76,14 @@ public class HotelManagementSystem {
   }
 
   public void viewUserHotelOptions() {
+    List<HotelWithAmenities> hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities();
+    String s = "Name        |  Email        |  Phone          | State| Town  | Street         | Amenities                   | Amenities Description";
+    s=String.join("\u0332",s.split("",-1));
+    System.out.println(s);
+    for(HotelWithAmenities hotel:hotelWithAmenities){
+      System.out.println(hotel.getName()+" | "+hotel.getEmail()+" | "+hotel.getPhone()+" |  "+hotel.getState()+"  | "
+          +hotel.getTown()+" | "+hotel.getStreet()+" | "+hotel.getAmenities()+" | "+hotel.getAmenitiesDescription());
+    }
 
   }
 
