@@ -109,7 +109,7 @@ public class HotelManagementSystem {
     String ssn = reader.nextLine();
     User user = userModel.getUserBySSN(ssn);
     if (user == null) {
-      System.out.println("User doesn't exist please signup");
+      System.out.println("User doesn't exist please signup first");
       startUserSignupProcess();
     }
     else {
