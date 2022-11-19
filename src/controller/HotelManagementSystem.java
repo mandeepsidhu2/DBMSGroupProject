@@ -1,6 +1,5 @@
 package controller;
 
-import entity.Hotel;
 import entity.HotelWithAmenities;
 import entity.User;
 import java.sql.Connection;
@@ -77,38 +76,44 @@ public class HotelManagementSystem {
     //todo
   }
 
-  public void displayHotelDetailPage(HotelWithAmenities hotel){
+  public void displayHotelDetailPage(HotelWithAmenities hotel) {
 
   }
+
   public void viewUserHotelOptions() {
     List<HotelWithAmenities> hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities();
-    String s = "Id |Name        |  Email        |  Phone          | State| Town  | Street         | Amenities                   | Amenities Description";
-    s=String.join("\u0332",s.split("",-1));
+    String s = "Id |Name        |  Email        |  Phone          | Available Rooms | State| Town  | Street         | Amenities                   | Amenities Description";
+    s = String.join("\u0332", s.split("", -1));
     System.out.println(s);
-    for(HotelWithAmenities hotel:hotelWithAmenities){
-      System.out.println(hotel.getId()+ " | "+ hotel.getName()+" | "+hotel.getEmail()+" | "+hotel.getPhone()+" |  "+hotel.getState()+"  | "
-          +hotel.getTown()+" | "+hotel.getStreet()+" | "+hotel.getAmenities()+" | "+hotel.getAmenitiesDescription());
+    for (HotelWithAmenities hotel : hotelWithAmenities) {
+      System.out.println(hotel.getId() + " | " + hotel.getName() + " | " + hotel.getEmail() + " | "
+          + hotel.getPhone() + " |  " + hotel.getTotalAvailableRooms() + " | " + hotel.getState()
+          + "  | "
+          + hotel.getTown() + " | " + hotel.getStreet() + " | " + hotel.getAmenities() + " | "
+          + hotel.getAmenitiesDescription());
     }
     System.out.println("Enter a hotel id to view further details or press any other key to exit");
     Integer optionSelected;
     try {
-      optionSelected=inputAnIntFromUser();
-      if(hotelWithAmenities.stream().filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected)).collect(
-          Collectors.toList()).size()==0){
+      optionSelected = inputAnIntFromUser();
+      if (hotelWithAmenities.stream()
+          .filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected))
+          .collect(
+              Collectors.toList()).size() == 0) {
         throw new IllegalArgumentException("Invalid hotel id selected");
       }
-    }
-    catch (IllegalArgumentException e){
+    } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       viewUserHotelOptions();
       return;
-    }catch (Exception e){
+    } catch (Exception e) {
       System.out.println("Going back to previous menu");
       loggedInUserJourney();
       return;
     }
-    displayHotelDetailPage(hotelWithAmenities.stream().filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected)).collect(
-        Collectors.toList()).get(0));
+    displayHotelDetailPage(hotelWithAmenities.stream()
+        .filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected)).collect(
+            Collectors.toList()).get(0));
   }
 
   private Integer inputAnIntFromUser() {

@@ -1,8 +1,6 @@
 package model;
 
-import entity.Hotel;
 import entity.HotelWithAmenities;
-import entity.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,7 +14,8 @@ public class HotelModel {
     this.procedureExecutor = procedureExecutor;
   }
 
-  List<HotelWithAmenities> getFromIteratorHotelWithAmenities(ResultSet resultSetFromProcedure) throws SQLException {
+  List<HotelWithAmenities> getFromIteratorHotelWithAmenities(ResultSet resultSetFromProcedure)
+      throws SQLException {
     List<HotelWithAmenities> list = new ArrayList<>();
     while (resultSetFromProcedure.next()) {
       Integer id = Integer.valueOf(resultSetFromProcedure.getString("id"));
@@ -31,11 +30,14 @@ public class HotelModel {
 
       String amenitiesName = resultSetFromProcedure.getString("amenities");
       String amenitiesDescription = resultSetFromProcedure.getString("amenitiesDescription");
+      Integer totalAvailableRooms = Integer.valueOf(
+          resultSetFromProcedure.getString("totalAvailableRooms"));
 
-
-      HotelWithAmenities hotel = new HotelWithAmenities().builder().id(id).name(name).avgRating(avgRating).email(email)
+      HotelWithAmenities hotel = new HotelWithAmenities().builder().id(id).name(name)
+          .avgRating(avgRating).email(email)
           .phone(phone).town(town).state(state).zip(zip).state(state).street(street)
           .amenities(amenitiesName).amenitiesDescription(amenitiesDescription)
+          .totalAvailableRooms(totalAvailableRooms)
           .build();
       list.add(hotel);
     }

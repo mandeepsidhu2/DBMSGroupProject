@@ -9,8 +9,9 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class HotelWithAmenities extends Hotel{
+public class HotelWithAmenities extends Hotel {
+
   private String amenities;
   private String amenitiesDescription;
-
+  private Integer totalAvailableRooms;
 }
