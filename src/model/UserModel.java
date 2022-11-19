@@ -1,7 +1,6 @@
 package model;
 
 import entity.User;
-import entity.User.UserBuilder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,7 +24,8 @@ public class UserModel {
       String name = resultSetFromProcedure.getString("name");
       String email = resultSetFromProcedure.getString("email");
 
-      User user = new UserBuilder().age(age).email(email).name(name).customerId(customerId).ssn(ssn)
+      User user = new User().toBuilder().age(age).email(email).name(name).customerId(customerId)
+          .ssn(ssn)
           .phone(phone).build();
       list.add(user);
     }

@@ -1,6 +1,5 @@
 package model;
 
-import com.mysql.cj.jdbc.result.ResultSetImpl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,14 +52,15 @@ public class ProcedureExecutor {
     return resultSet;
   }
 
-  public void cleanup(){
+  public void cleanup() {
     try {
-      if(prepareStatementForProcedure!=null)
+      if (prepareStatementForProcedure != null) {
         prepareStatementForProcedure.close();
-      if(resultSet!=null)
+      }
+      if (resultSet != null) {
         resultSet.close();
-    }
-    catch (Exception e){
+      }
+    } catch (Exception e) {
       System.out.println(e.getMessage());
     }
 
