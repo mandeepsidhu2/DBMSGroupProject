@@ -19,6 +19,7 @@ public class HotelModel {
   List<HotelWithAmenities> getFromIteratorHotelWithAmenities(ResultSet resultSetFromProcedure) throws SQLException {
     List<HotelWithAmenities> list = new ArrayList<>();
     while (resultSetFromProcedure.next()) {
+      Integer id = Integer.valueOf(resultSetFromProcedure.getString("id"));
       String name = resultSetFromProcedure.getString("name");
       String street = resultSetFromProcedure.getString("street");
       String town = resultSetFromProcedure.getString("town");
@@ -32,7 +33,7 @@ public class HotelModel {
       String amenitiesDescription = resultSetFromProcedure.getString("amenitiesDescription");
 
 
-      HotelWithAmenities hotel = new HotelWithAmenities().builder().name(name).avgRating(avgRating).email(email)
+      HotelWithAmenities hotel = new HotelWithAmenities().builder().id(id).name(name).avgRating(avgRating).email(email)
           .phone(phone).town(town).state(state).zip(zip).state(state).street(street)
           .amenities(amenitiesName).amenitiesDescription(amenitiesDescription)
           .build();

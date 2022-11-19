@@ -80,17 +80,25 @@ DROP TABLE IF EXISTS `booking`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `booking` (
                            `customer` int NOT NULL,
-                           `order` int NOT NULL,
+                           `bookingId` int NOT NULL,
                            `hotel` int NOT NULL,
-                           `bookedby_staffid` int DEFAULT NULL,
-                           `ischeckedin` tinyint DEFAULT NULL,
-                           `ischeckedout` tinyint DEFAULT NULL,
-                           PRIMARY KEY (`order`),
+                           `bookedByStaffId` int NOT NULL,
+                           `isCheckedIn` tinyint DEFAULT '0',
+                           `isCheckedOut` tinyint DEFAULT '0',
+                           `startDate` datetime DEFAULT NULL,
+                           `endDate` datetime DEFAULT NULL,
+                           `rating` varchar(45) DEFAULT NULL,
+                           `ratingDescription` varchar(45) DEFAULT NULL,
+                           PRIMARY KEY (`bookingId`),
+                           UNIQUE KEY `startDate_UNIQUE` (`startDate`),
+                           UNIQUE KEY `endDate_UNIQUE` (`endDate`),
                            KEY `customer_fk_idx` (`customer`),
                            KEY `hotel_fk_idx` (`hotel`),
+                           KEY `staff_fk_idx` (`bookedByStaffId`),
                            CONSTRAINT `booking_hotel_fk` FOREIGN KEY (`hotel`) REFERENCES `hotel` (`id`),
                            CONSTRAINT `customer_fk` FOREIGN KEY (`customer`) REFERENCES `customer` (`customer_id`),
-                           CONSTRAINT `order_fk` FOREIGN KEY (`order`) REFERENCES `order` (`orderid`)
+                           CONSTRAINT `occupant_fk` FOREIGN KEY (`bookingId`) REFERENCES `occupantsinorder` (`bookingId`),
+                           CONSTRAINT `staff_fk` FOREIGN KEY (`bookedByStaffId`) REFERENCES `staff` (`staffid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -196,13 +204,13 @@ DROP TABLE IF EXISTS `occupantsinorder`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `occupantsinorder` (
-                                    `orderid` int NOT NULL,
-                                    `occuppant_ssn` varchar(45) NOT NULL,
+                                    `bookingId` int NOT NULL,
+                                    `occuppantSSN` varchar(45) NOT NULL,
                                     `age` int DEFAULT NULL,
-                                    PRIMARY KEY (`orderid`,`occuppant_ssn`),
-                                    KEY `occupant_ssn_idx` (`occuppant_ssn`),
-                                    CONSTRAINT `occupant_ssn` FOREIGN KEY (`occuppant_ssn`) REFERENCES `occupant` (`ssn`),
-                                    CONSTRAINT `order_id` FOREIGN KEY (`orderid`) REFERENCES `order` (`orderid`)
+                                    PRIMARY KEY (`bookingId`,`occuppantSSN`),
+                                    KEY `occupant_ssn_idx` (`occuppantSSN`),
+                                    CONSTRAINT `occupant_ssn` FOREIGN KEY (`occuppantSSN`) REFERENCES `occupant` (`ssn`),
+                                    CONSTRAINT `order_id` FOREIGN KEY (`bookingId`) REFERENCES `order` (`orderid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -213,32 +221,6 @@ CREATE TABLE `occupantsinorder` (
 LOCK TABLES `occupantsinorder` WRITE;
 /*!40000 ALTER TABLE `occupantsinorder` DISABLE KEYS */;
 /*!40000 ALTER TABLE `occupantsinorder` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `order`
---
-
-DROP TABLE IF EXISTS `order`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `order` (
-                         `orderid` int NOT NULL,
-                         `startdate` date NOT NULL,
-                         `enddate` varchar(45) NOT NULL,
-                         `rating` enum('1','2','3','4','5') DEFAULT NULL,
-                         `rating_description` varchar(45) DEFAULT NULL,
-                         PRIMARY KEY (`orderid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `order`
---
-
-LOCK TABLES `order` WRITE;
-/*!40000 ALTER TABLE `order` DISABLE KEYS */;
-/*!40000 ALTER TABLE `order` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -264,6 +246,7 @@ CREATE TABLE `roomcategory` (
 
 LOCK TABLES `roomcategory` WRITE;
 /*!40000 ALTER TABLE `roomcategory` DISABLE KEYS */;
+INSERT INTO `roomcategory` VALUES ('Deluxe',1,0,'Enjoy Deluxe previlige, clean rooms with built in fridge',0),('Ultra',1,1,'Enjoy Ultra previlige, clean rooms with a balcony and built in fridge!',0),('Suite',1,1,'Enjoy our best Suite previlige, clean rooms with  a balcony, bathtub and built in fridge',1);
 /*!40000 ALTER TABLE `roomcategory` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -294,6 +277,7 @@ CREATE TABLE `rooms` (
 
 LOCK TABLES `rooms` WRITE;
 /*!40000 ALTER TABLE `rooms` DISABLE KEYS */;
+INSERT INTO `rooms` VALUES (1,1,'Deluxe',1,5),(2,1,'Deluxe',1,3),(3,1,'Deluxe',1,3),(4,1,'Deluxe',1,3),(5,1,'Ultra',1,4),(6,1,'Ultra',1,4),(7,1,'Ultra',1,4),(8,2,'Ultra',1,4),(9,2,'Ultra',1,4),(10,2,'Ultra',1,4),(11,2,'Suite',2,4),(12,2,'Suite',2,4),(13,2,'Suite',2,4);
 /*!40000 ALTER TABLE `rooms` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -416,4 +400,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-19 17:03:20
+-- Dump completed on 2022-11-19 17:51:03

@@ -1,5 +1,6 @@
 package controller;
 
+import entity.Hotel;
 import entity.HotelWithAmenities;
 import entity.User;
 import java.sql.Connection;
@@ -8,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import model.HotelModel;
 import model.ProcedureExecutor;
 import model.UserModel;
@@ -75,16 +77,38 @@ public class HotelManagementSystem {
     //todo
   }
 
+  public void displayHotelDetailPage(HotelWithAmenities hotel){
+
+  }
   public void viewUserHotelOptions() {
     List<HotelWithAmenities> hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities();
-    String s = "Name        |  Email        |  Phone          | State| Town  | Street         | Amenities                   | Amenities Description";
+    String s = "Id |Name        |  Email        |  Phone          | State| Town  | Street         | Amenities                   | Amenities Description";
     s=String.join("\u0332",s.split("",-1));
     System.out.println(s);
     for(HotelWithAmenities hotel:hotelWithAmenities){
-      System.out.println(hotel.getName()+" | "+hotel.getEmail()+" | "+hotel.getPhone()+" |  "+hotel.getState()+"  | "
+      System.out.println(hotel.getId()+ " | "+ hotel.getName()+" | "+hotel.getEmail()+" | "+hotel.getPhone()+" |  "+hotel.getState()+"  | "
           +hotel.getTown()+" | "+hotel.getStreet()+" | "+hotel.getAmenities()+" | "+hotel.getAmenitiesDescription());
     }
-
+    System.out.println("Enter a hotel id to view further details or press any other key to exit");
+    Integer optionSelected;
+    try {
+      optionSelected=inputAnIntFromUser();
+      if(hotelWithAmenities.stream().filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected)).collect(
+          Collectors.toList()).size()==0){
+        throw new IllegalArgumentException("Invalid hotel id selected");
+      }
+    }
+    catch (IllegalArgumentException e){
+      System.out.println(e.getMessage());
+      viewUserHotelOptions();
+      return;
+    }catch (Exception e){
+      System.out.println("Going back to previous menu");
+      loggedInUserJourney();
+      return;
+    }
+    displayHotelDetailPage(hotelWithAmenities.stream().filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected)).collect(
+        Collectors.toList()).get(0));
   }
 
   private Integer inputAnIntFromUser() {

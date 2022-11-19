@@ -3,6 +3,14 @@ insert into hotel (name,street,town,state,zip,avgrating,phone,email) values
 ("Hotel Plaza","Symphony Street","Truro","MA","02115",0,"+1 656-334-6296","plaza@hmz.com");
 insert into hotel (name,street,town,state,zip,avgrating,phone,email) values 
 ("Hotel Banquet","Harrison Street","Truro","MA","02115",0,"+1 616-334-6296","banquet@hmz.com");
+
+insert into roomcategory (category,hasFridge,hasBalcony,hasBathtub,description) values
+("Deluxe",true,false,false,"Enjoy Deluxe previlige, clean rooms with built in fridge");
+insert into roomcategory (category,hasFridge,hasBalcony,hasBathtub,description) values
+("Ultra",true,true,false,"Enjoy Ultra previlige, clean rooms with a balcony and built in fridge!");
+insert into roomcategory (category,hasFridge,hasBalcony,hasBathtub,description) values
+("Suite",true,true,true,"Enjoy our best Suite previlige, clean rooms with  a balcony, bathtub and built in fridge");
+
 insert into amenities (name ,description) values ("Swimming pool","Exquisite swimming pool");
 insert into amenities (name ,description) values ("Heating","Heating available 24*7");
 insert into amenities (name ,description) values ("Bar","In house bar!");
