@@ -41,6 +41,7 @@ public class UserModel {
         .setStatementParam(4, user.getPhone())
         .setStatementParam(5, user.getAge().toString())
         .execute();
+    procedureExecutor.cleanup();
     System.out.println("User saved");
   }
 
@@ -55,6 +56,7 @@ public class UserModel {
       System.out.println(e.getMessage());
       return null;
     }
+    procedureExecutor.cleanup();
     if (users.size() == 0) {
       return null;
     } else {

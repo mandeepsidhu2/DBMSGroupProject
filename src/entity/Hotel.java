@@ -1,2 +1,5 @@
-package entity;public class Hotel {
+package entity;
+
+public class Hotel {
+
 }

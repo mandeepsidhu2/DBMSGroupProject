@@ -1,5 +1,6 @@
 package model;
 
+import com.mysql.cj.jdbc.result.ResultSetImpl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +10,8 @@ public class ProcedureExecutor {
 
   private final Connection connection;
   private PreparedStatement prepareStatementForProcedure;
+
+  private ResultSet resultSet;
 
   public ProcedureExecutor(Connection connection) {
     this.connection = connection;
@@ -41,12 +44,25 @@ public class ProcedureExecutor {
     ResultSet resultSet = null;
     try {
       resultSet = prepareStatementForProcedure.executeQuery();
-      //prepareStatementForProcedure.close();
 
     } catch (SQLException sqlException) {
       System.out.println("Cannot fetch data " + sqlException.getMessage());
       return null;
     }
+    this.resultSet = resultSet;
     return resultSet;
+  }
+
+  public void cleanup(){
+    try {
+      if(prepareStatementForProcedure!=null)
+        prepareStatementForProcedure.close();
+      if(resultSet!=null)
+        resultSet.close();
+    }
+    catch (Exception e){
+      System.out.println(e.getMessage());
+    }
+
   }
 }
