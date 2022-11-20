@@ -1,5 +1,6 @@
 package controller;
 
+import entity.Booking;
 import entity.HotelAvailability;
 import entity.HotelWithAmenities;
 import entity.User;
@@ -81,8 +82,15 @@ public class HotelManagementSystem {
   }
 
   public void manageUserBookings() {
-
-    //todo
+    List<Booking> bookingList=null;
+    try {
+      bookingList=this.bookingModel.getBookingsForARoom(this.currentUserContext.getCustomerId())
+    }catch (Exception e){
+      System.out.println("Unable to fetch bookings");
+      loggedInUserJourney();
+      return;
+    }
+    //todo for loop display bookings as, upcming, checked in, past
   }
 
   private void getHotelAvailabilityForAHotelForInputDates(HotelWithAmenities hotel, Date startDate,

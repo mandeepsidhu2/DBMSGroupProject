@@ -1,6 +1,7 @@
 package model;
 
 import entity.Booking;
+import entity.HotelAvailability;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -54,6 +55,22 @@ public class BookingModel {
     return list;
   }
 
+  public List<Booking> getBookingsForARoom(Integer customerID) throws SQLException {
+    String query = "call getUserBookings(?)";
+
+    ResultSet resultSet = procedureExecutor.preparedStatement(query)
+        .setStatementParam(1, customerID.toString())
+        .execute();
+
+    List<Booking> bookingList;
+    try {
+      bookingList = getFromIteratorHotelWithAmenities(resultSet);
+    } catch (Exception e) {
+      throw e;
+    }
+    procedureExecutor.cleanup();
+    return bookingList;
+  }
   public void bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
       String roomCategory) {
     String query = "call createBooking(?,?,?,?,?,?)";
