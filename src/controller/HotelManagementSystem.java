@@ -84,7 +84,7 @@ public class HotelManagementSystem {
   public void manageUserBookings() {
     List<Booking> bookingList=null;
     try {
-      bookingList=this.bookingModel.getBookingsForARoom(this.currentUserContext.getCustomerId())
+      bookingList=this.bookingModel.getBookingsForARoom(this.currentUserContext.getCustomerId());
     }catch (Exception e){
       System.out.println("Unable to fetch bookings");
       loggedInUserJourney();
