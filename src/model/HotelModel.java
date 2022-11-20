@@ -4,6 +4,7 @@ import entity.HotelWithAmenities;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class HotelModel {
@@ -44,9 +45,11 @@ public class HotelModel {
     return list;
   }
 
-  public List<HotelWithAmenities> getAllAvailableHotelsWithAmenities() {
-    String query = "call getAvailableHotels()";
-    ResultSet resultSet = procedureExecutor.preparedStatement(query).execute();
+  public List<HotelWithAmenities> getAllAvailableHotelsWithAmenities(Date availableHotelsForDate) {
+    String query = "call getAvailableHotels(?)";
+    ResultSet resultSet = procedureExecutor.preparedStatement(query)
+        .setStatementParam(1, new java.sql.Date(availableHotelsForDate.getTime()).toString())
+        .execute();
     List<HotelWithAmenities> hotelWithAmenities;
     try {
       hotelWithAmenities = getFromIteratorHotelWithAmenities(resultSet);

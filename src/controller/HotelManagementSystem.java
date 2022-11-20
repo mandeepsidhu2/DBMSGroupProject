@@ -5,6 +5,8 @@ import entity.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
@@ -80,8 +82,21 @@ public class HotelManagementSystem {
 
   }
 
-  public void viewUserHotelOptions() {
-    List<HotelWithAmenities> hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities();
+  public void viewUserHotelOptions(Boolean getAvailabilityToday) {
+    Date dateToQuery = new Date();
+    if (!getAvailabilityToday) {
+      System.out.println("Please enter date in format YYYY-MM-DD");
+      String dateInput = reader.nextLine();
+      try {
+        dateToQuery = new SimpleDateFormat("YYYY-MM-DD").parse(dateInput);
+      } catch (Exception e) {
+        System.out.println("Invalid date enetered!");
+        viewUserHotelOptions(false);
+        return;
+      }
+    }
+    List<HotelWithAmenities> hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities(
+        dateToQuery);
     String s = "Id |Name        |  Email        |  Phone          | Available Rooms | State| Town  | Street         | Amenities                   | Amenities Description";
     s = String.join("\u0332", s.split("", -1));
     System.out.println(s);
@@ -104,7 +119,7 @@ public class HotelManagementSystem {
       }
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      viewUserHotelOptions();
+      viewUserHotelOptions(getAvailabilityToday);
       return;
     } catch (Exception e) {
       System.out.println("Going back to previous menu");
@@ -143,9 +158,12 @@ public class HotelManagementSystem {
         manageUserBookings();
         break;
       case 2:
-        viewUserHotelOptions();
+        viewUserHotelOptions(true);
         break;
       case 3:
+        viewUserHotelOptions(false);
+        break;
+      case 4:
         this.currentUserContext = null;
         startUserLoginProcess();
         System.out.println("Logged out!");

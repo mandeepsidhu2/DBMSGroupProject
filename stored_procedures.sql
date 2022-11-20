@@ -77,16 +77,17 @@ delimiter ;
 drop procedure if exists getAvailableHotels;
 delimiter //
 create procedure getAvailableHotels(
+		in  dateInput date
     )
 	begin
-	select hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,getTotalRoomsAvailableForHotel(hotel.id,CURDATE()) as totalAvailableRooms,
+	select hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,getTotalRoomsAvailableForHotel(hotel.id,dateInput) as totalAvailableRooms,
     zip,avgrating,group_concat(amenities.name) as amenities,group_concat(amenities.description) as amenitiesDescription from hotel
         inner join amenitiesathotel on hotel.id=amenitiesathotel.hotelid
         inner join amenities on amenities.id=amenitiesathotel.amenityid
         group by hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,zip,avgrating;
     end //
 delimiter ;
-call getAvailcustomerableHotels();
+call getAvailableHotels(CURDATE());
 
 
 
