@@ -101,23 +101,4 @@ public class HotelModel {
     return hotelAvailabilities;
   }
 
-  public void bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
-      String roomCategory) {
-    String query = "call createBooking(?,?,?,?,?,?)";
-    try {
-      procedureExecutor.preparedStatement(query)
-          .setStatementParam(1, hotelId.toString())
-          .setStatementParam(2, customerId.toString())
-          .setStatementParam(3, new java.sql.Date(reqStartDate.getTime()).toString())
-          .setStatementParam(4, new java.sql.Date(reqEndDate.getTime()).toString())
-          .setStatementParam(5, roomCategory)
-          .setStatementParam(6, null)
-          .execute();
-      procedureExecutor.cleanup();
-    } catch (Exception e) {
-      throw e;
-    }
-
-
-  }
 }

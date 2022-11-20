@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import model.BookingModel;
 import model.HotelModel;
 import model.ProcedureExecutor;
 import model.UserModel;
@@ -42,6 +43,9 @@ public class HotelManagementSystem {
   private final View view;
   private final UserModel userModel;
   private final HotelModel hotelModel;
+
+  private final BookingModel bookingModel;
+
   Scanner reader = new Scanner(System.in);
   private User currentUserContext;
   private Connection connection = null;
@@ -65,6 +69,7 @@ public class HotelManagementSystem {
       ProcedureExecutor procedureExecutor = new ProcedureExecutor(connection);
       userModel = new UserModel(procedureExecutor);
       hotelModel = new HotelModel(procedureExecutor);
+      bookingModel = new BookingModel(procedureExecutor);
     } catch (Exception e) {
       System.out.println(e.getMessage());
       throw new Exception("Invalid username or password was entered, try again\n");
@@ -76,6 +81,7 @@ public class HotelManagementSystem {
   }
 
   public void manageUserBookings() {
+
     //todo
   }
 
@@ -123,7 +129,7 @@ public class HotelManagementSystem {
     Integer idxOfHotelAvailabilityInArray = optionSelected - 1;
 
     try {
-      this.hotelModel.bookARoom(this.currentUserContext.getCustomerId(), startDate, endDate,
+      this.bookingModel.bookARoom(this.currentUserContext.getCustomerId(), startDate, endDate,
           hotel.getId(),
           hotelAvailabilities.get(idxOfHotelAvailabilityInArray).getRoomCategory()
       );
