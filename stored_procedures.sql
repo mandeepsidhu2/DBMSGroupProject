@@ -79,13 +79,14 @@ delimiter //
 create procedure getAvailableHotels(
     )
 	begin
-	select hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,zip,avgrating,group_concat(amenities.name) as amenities,group_concat(amenities.description) as amenitiesDescription from hotel
+	select hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,getTotalRoomsAvailableForHotel(hotel.id,CURDATE()) as totalAvailableRooms,
+    zip,avgrating,group_concat(amenities.name) as amenities,group_concat(amenities.description) as amenitiesDescription from hotel
         inner join amenitiesathotel on hotel.id=amenitiesathotel.hotelid
         inner join amenities on amenities.id=amenitiesathotel.amenityid
         group by hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,zip,avgrating;
     end //
 delimiter ;
-call getAvailableHotels();
+call getAvailcustomerableHotels();
 
 
 

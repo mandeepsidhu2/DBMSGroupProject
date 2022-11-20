@@ -80,26 +80,29 @@ CREATE TABLE `booking` (
   `customer` int NOT NULL,
   `bookingId` int NOT NULL,
   `hotel` int NOT NULL,
-  `bookedByStaffId` int NOT NULL,
-  `isCheckedIn` tinyint DEFAULT '0',
+  `checkedInByStaffId` int DEFAULT NULL,
+  `isCheckedIn` tinyint NOT NULL DEFAULT '0',
   `isCheckedOut` tinyint DEFAULT '0',
   `startDate` datetime DEFAULT NULL,
   `endDate` datetime DEFAULT NULL,
   `rating` varchar(45) DEFAULT NULL,
   `ratingDescription` varchar(45) DEFAULT NULL,
   `roomNo` int NOT NULL,
-  PRIMARY KEY (`bookingId`),
+  `checkedOutByStaffId` int DEFAULT NULL,
+  PRIMARY KEY (`bookingId`,`isCheckedIn`),
   UNIQUE KEY `startDate_UNIQUE` (`startDate`),
   UNIQUE KEY `endDate_UNIQUE` (`endDate`),
   KEY `customer_fk_idx` (`customer`),
   KEY `hotel_fk_idx` (`hotel`),
-  KEY `staff_fk_idx` (`bookedByStaffId`),
+  KEY `staff_fk_idx` (`checkedInByStaffId`),
   KEY `room_fk_idx` (`roomNo`),
+  KEY `staff_checkout_fk_idx` (`checkedOutByStaffId`),
   CONSTRAINT `booking_hotel_fk` FOREIGN KEY (`hotel`) REFERENCES `hotel` (`id`),
   CONSTRAINT `customer_fk` FOREIGN KEY (`customer`) REFERENCES `customer` (`customer_id`),
   CONSTRAINT `occupant_fk` FOREIGN KEY (`bookingId`) REFERENCES `occupantsinorder` (`bookingId`),
   CONSTRAINT `room_fk` FOREIGN KEY (`roomNo`) REFERENCES `rooms` (`roomNo`),
-  CONSTRAINT `staff_fk` FOREIGN KEY (`bookedByStaffId`) REFERENCES `staff` (`staffid`)
+  CONSTRAINT `staff_checkin_fk` FOREIGN KEY (`checkedInByStaffId`) REFERENCES `staff` (`staffid`),
+  CONSTRAINT `staff_checkout_fk` FOREIGN KEY (`checkedOutByStaffId`) REFERENCES `staff` (`staffid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -128,7 +131,7 @@ CREATE TABLE `customer` (
   `age` int DEFAULT NULL,
   PRIMARY KEY (`customer_id`),
   UNIQUE KEY `ssn_UNIQUE` (`ssn`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +140,7 @@ CREATE TABLE `customer` (
 
 LOCK TABLES `customer` WRITE;
 /*!40000 ALTER TABLE `customer` DISABLE KEYS */;
-INSERT INTO `customer` VALUES (1,'SSN58534','Arun','2323232','da@j.com',12),(2,'SSN13987','Pde','kjwn!lmk','238928',13),(3,'SSN82402','Mandora','kdsl@jn.ciom','313981',23),(5,'SSN2929','Paul','mwkjn@jkn.com','3989283',23),(6,'SSN0182398','Laura','la@uwd.com','12793109',42);
+INSERT INTO `customer` VALUES (1,'SSN58534','Arun','2323232','da@j.com',12),(2,'SSN13987','Pde','kjwn!lmk','238928',13),(3,'SSN82402','Mandora','kdsl@jn.ciom','313981',23),(5,'SSN2929','Paul','mwkjn@jkn.com','3989283',23),(6,'SSN0182398','Laura','la@uwd.com','12793109',42),(7,'SSN12345','Ujwal','uj@g.com','4982977',25);
 /*!40000 ALTER TABLE `customer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -415,9 +418,10 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAvailableHotels`(
     )
 begin
-	select hotel.id,getTotalRoomsAvailableForHotel(hotel.id) as totalAvailableRooms,hotel.name,hotel.phone,hotel.email,street,town,state,zip,avgrating,group_concat(amenities.name) as amenities,group_concat(amenities.description) as amenitiesDescription from hotel
-        inner join amenitiesathotel on hotel.id=amenitiesathotel.hotelid 
-        inner join amenities on amenities.id=amenitiesathotel.amenityid 
+	select hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,getTotalRoomsAvailableForHotel(hotel.id,CURDATE()) as totalAvailableRooms,
+    zip,avgrating,group_concat(amenities.name) as amenities,group_concat(amenities.description) as amenitiesDescription from hotel
+        inner join amenitiesathotel on hotel.id=amenitiesathotel.hotelid
+        inner join amenities on amenities.id=amenitiesathotel.amenityid
         group by hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,zip,avgrating;
     end ;;
 DELIMITER ;
@@ -508,4 +512,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-19 19:28:57
+-- Dump completed on 2022-11-19 20:00:45
