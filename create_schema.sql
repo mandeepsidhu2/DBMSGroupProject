@@ -78,20 +78,18 @@ DROP TABLE IF EXISTS `booking`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `booking` (
   `customer` int NOT NULL,
-  `bookingId` int NOT NULL,
+  `bookingId` int NOT NULL AUTO_INCREMENT,
   `hotel` int NOT NULL,
   `checkedInByStaffId` int DEFAULT NULL,
   `isCheckedIn` tinyint NOT NULL DEFAULT '0',
   `isCheckedOut` tinyint DEFAULT '0',
-  `startDate` datetime DEFAULT NULL,
-  `endDate` datetime DEFAULT NULL,
+  `startDate` datetime NOT NULL,
+  `endDate` datetime NOT NULL,
   `rating` varchar(45) DEFAULT NULL,
   `ratingDescription` varchar(45) DEFAULT NULL,
   `roomNo` int NOT NULL,
   `checkedOutByStaffId` int DEFAULT NULL,
   PRIMARY KEY (`bookingId`,`isCheckedIn`),
-  UNIQUE KEY `startDate_UNIQUE` (`startDate`),
-  UNIQUE KEY `endDate_UNIQUE` (`endDate`),
   KEY `customer_fk_idx` (`customer`),
   KEY `hotel_fk_idx` (`hotel`),
   KEY `staff_fk_idx` (`checkedInByStaffId`),
@@ -99,7 +97,6 @@ CREATE TABLE `booking` (
   KEY `staff_checkout_fk_idx` (`checkedOutByStaffId`),
   CONSTRAINT `booking_hotel_fk` FOREIGN KEY (`hotel`) REFERENCES `hotel` (`id`),
   CONSTRAINT `customer_fk` FOREIGN KEY (`customer`) REFERENCES `customer` (`customer_id`),
-  CONSTRAINT `occupant_fk` FOREIGN KEY (`bookingId`) REFERENCES `occupantsinorder` (`bookingId`),
   CONSTRAINT `room_fk` FOREIGN KEY (`roomNo`) REFERENCES `rooms` (`roomNo`),
   CONSTRAINT `staff_checkin_fk` FOREIGN KEY (`checkedInByStaffId`) REFERENCES `staff` (`staffid`),
   CONSTRAINT `staff_checkout_fk` FOREIGN KEY (`checkedOutByStaffId`) REFERENCES `staff` (`staffid`)
@@ -236,8 +233,8 @@ CREATE TABLE `occupantsinorder` (
   `age` int DEFAULT NULL,
   PRIMARY KEY (`bookingId`,`occuppantSSN`),
   KEY `occupant_ssn_idx` (`occuppantSSN`),
-  CONSTRAINT `occupant_ssn` FOREIGN KEY (`occuppantSSN`) REFERENCES `occupant` (`ssn`),
-  CONSTRAINT `order_id` FOREIGN KEY (`bookingId`) REFERENCES `order` (`orderid`)
+  CONSTRAINT `booking_id` FOREIGN KEY (`bookingId`) REFERENCES `booking` (`bookingId`),
+  CONSTRAINT `occupant_ssn` FOREIGN KEY (`occuppantSSN`) REFERENCES `occupant` (`ssn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -380,6 +377,70 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `createBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createBooking`(
+in hotelIdInput int,
+in customerIdInput int,
+in startDateInput date,
+in endDateInput date,
+in roomCategory char(50),
+in roomNoInput int
+)
+begin
+    -- check if room no and hotel id is valid
+	
+	   declare countOfRoomsWithGivenInfo int default 0;
+	   declare bookingsCountOfRoomNoWithinStartAndEndDate int default 0;
+	   declare availableRoomNo int default roomNoInput;
+       
+       if(datediff(endDateInput,startDateInput)< 1 ) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'You have to book a room for atleast a day';
+       end if;
+       
+        if(roomNoInput is not null) then -- check for other bookings of the same room if booking is to be made for a specific room
+			
+			select count(*) into countOfRoomsWithGivenInfo  from rooms
+			inner join hotel on hotel.id=rooms.hotelid where hotelid=hotelIdInput and roomno=roomNoINput;
+			
+			if (countOfRoomsWithGivenInfo !=1) then
+					SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Hotel and room id combination is invalid';
+			end if;
+
+			select count(*) into bookingsCountOfRoomNoWithinStartAndEndDate from booking where (endDate between
+			startDateInput and endDateInput or startDate between startDateInput and endDateInput)
+            and hotel=hotelIdInput and roomNo=roomNoInput;
+			if(bookingsCountOfRoomNoWithinStartAndEndDate!=0) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Room already booked in the requested date frame';
+			end if;
+        else -- choise first available room, if a specific room was not requested by the function call
+			select roomNo into availableRoomNo from rooms where rooms.hotelid=hotelIdInput and rooms.category=roomCategory and not exists(
+            select * from booking where roomNo=rooms.roomNo and (endDate between
+			startDateInput and endDateInput or startDate between startDateInput and endDateInput)
+            ) limit 1;
+            
+            if(availableRoomNo is null) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'No room is found, please try again';
+            end if;
+	
+		end if;
+
+        
+		insert into booking (customer,hotel,startDate,endDate,roomNo) values (customerIdInput,hotelIdInput,startDateInput,endDateInput,availableRoomNo);
+    end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `createUser` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -416,9 +477,10 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAvailableHotels`(
+		in  dateInput date
     )
 begin
-	select hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,getTotalRoomsAvailableForHotel(hotel.id,CURDATE()) as totalAvailableRooms,
+	select hotel.id,hotel.name,hotel.phone,hotel.email,street,town,state,getTotalRoomsAvailableForHotel(hotel.id,dateInput) as totalAvailableRooms,
     zip,avgrating,group_concat(amenities.name) as amenities,group_concat(amenities.description) as amenitiesDescription from hotel
         inner join amenitiesathotel on hotel.id=amenitiesathotel.hotelid
         inner join amenities on amenities.id=amenitiesathotel.amenityid
@@ -439,11 +501,20 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getHotelCategoryWiseAvailability`(in hotelIdInput int,in dateInput date)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getHotelCategoryWiseAvailability`(in hotelIdInput int,in reqStartDate date,in reqEndDate date)
 begin
+		if(datediff(reqEndDate,reqStartDate)< 1 ) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Enter days atleast 1 day apart';
+       end if;
+       
 		select hotel.id ,category as roomCategory,(count(roomno) -
 		(select count(*) from booking inner join rooms using(roomNo) where hotel=hotelIdInput 
-        and dateInput between startDate and endDate
+        and (
+        reqStartDate between startDate and endDate
+			or
+		reqEndDate between startDate and endDate   
+        )
+        
         and rooms.category=roomCategory))
 		as availableRooms
 		from hotel inner join rooms on hotel.id = rooms.hotelid
@@ -512,4 +583,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-19 20:00:45
+-- Dump completed on 2022-11-20  2:41:40

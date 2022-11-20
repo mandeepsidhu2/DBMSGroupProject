@@ -93,19 +93,27 @@ call getAvailableHotels(CURDATE());
 
 drop procedure if exists getHotelCategoryWiseAvailability;
 delimiter //
-create procedure getHotelCategoryWiseAvailability(in hotelIdInput int,in dateInput date)
+create procedure getHotelCategoryWiseAvailability(in hotelIdInput int,in reqStartDate date,in reqEndDate date)
 	begin
+		if(datediff(reqEndDate,reqStartDate)< 1 ) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Enter days atleast 1 day apart';
+       end if;
+       
 		select hotel.id ,category as roomCategory,(count(roomno) -
 		(select count(*) from booking inner join rooms using(roomNo) where hotel=hotelIdInput 
-        and dateInput between startDate and endDate
+        and (
+        reqStartDate between startDate and endDate
+			or
+		reqEndDate between startDate and endDate   
+        )
+        
         and rooms.category=roomCategory))
 		as availableRooms
 		from hotel inner join rooms on hotel.id = rooms.hotelid
 		where hotel.id=hotelIdInput group by hotel.id,category;
     end //
 delimiter ;
-call getHotelCategoryWiseAvailability(1,CURDATE());
-
+call getHotelCategoryWiseAvailability(1,CURDATE(),CURDATE() + INTERVAL 1 DAY);
 
 drop function if exists getTotalRoomsAvailableForHotel;
 delimiter //
@@ -131,8 +139,6 @@ select getTotalRoomsAvailableForHotel(1,CURDATE());
 
 
 
-    select rooms.roomno ,rooms.category   from rooms
-        inner join hotel on hotel.id=rooms.hotelid where hotelid=1 and roomno=1;
 
 
 drop procedure if exists createBooking;
@@ -142,32 +148,53 @@ in hotelIdInput int,
 in customerIdInput int,
 in startDateInput date,
 in endDateInput date,
-in roomNoINput int
+in roomCategory char(50),
+in roomNoInput int
 )
 	begin
     -- check if room no and hotel id is valid
 	
-		declare countOfRoomsWithGivenInfo int default 0;
+	   declare countOfRoomsWithGivenInfo int default 0;
 	   declare bookingsCountOfRoomNoWithinStartAndEndDate int default 0;
+	   declare availableRoomNo int default roomNoInput;
+       
+       if(datediff(endDateInput,startDateInput)< 1 ) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'You have to book a room for atleast a day';
+       end if;
+       
+        if(roomNoInput is not null) then -- check for other bookings of the same room if booking is to be made for a specific room
+			
+			select count(*) into countOfRoomsWithGivenInfo  from rooms
+			inner join hotel on hotel.id=rooms.hotelid where hotelid=hotelIdInput and roomno=roomNoINput;
+			
+			if (countOfRoomsWithGivenInfo !=1) then
+					SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Hotel and room id combination is invalid';
+			end if;
 
-        select count(*) into countOfRoomsWithGivenInfo  from rooms
-        inner join hotel on hotel.id=rooms.hotelid where hotelid=hotelIdInput and roomno=roomNoINput;
-        
-
-        if (countOfRoomsWithGivenInfo !=1) then
-        		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Hotel and room id combination is invalid';
-        end if;
+			select count(*) into bookingsCountOfRoomNoWithinStartAndEndDate from booking where (endDate between
+			startDateInput and endDateInput or startDate between startDateInput and endDateInput)
+            and hotel=hotelIdInput and roomNo=roomNoInput;
+			if(bookingsCountOfRoomNoWithinStartAndEndDate!=0) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Room already booked in the requested date frame';
+			end if;
+        else -- choise first available room, if a specific room was not requested by the function call
+			select roomNo into availableRoomNo from rooms where rooms.hotelid=hotelIdInput and rooms.category=roomCategory and not exists(
+            select * from booking where roomNo=rooms.roomNo and (endDate between
+			startDateInput and endDateInput or startDate between startDateInput and endDateInput)
+            ) limit 1;
+            
+            if(availableRoomNo is null) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'No room is found, please try again';
+            end if;
 	
-      -- check for other bookings of the same room
-        select count(*) into bookingsCountOfRoomNoWithinStartAndEndDate from bookings where endDate between
-        startDateInput and endDateInput or startDate between startDateInput and endDateInput;
-        
-        if(bookingsCountOfRoomNoWithinStartAndEndDate!=0) then
-			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Room already booked in the requested date frame';
-        end if;
+		end if;
 
         
-		insert into booking (customer,hotel,startDate,endDate,roomNo) values (customerIdInput,hotelIdInput,startDateInput,endDateInput,roomNoINput);
+		insert into booking (customer,hotel,startDate,endDate,roomNo) values (customerIdInput,hotelIdInput,startDateInput,endDateInput,availableRoomNo);
     end //
 delimiter ;
-call createBooking(1,1,curdate(),curdate(),1);
+-- select * from booking;
+-- truncate table booking;
+call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,null,1);
+call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
+

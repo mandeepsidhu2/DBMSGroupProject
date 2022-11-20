@@ -1,5 +1,6 @@
 package model;
 
+import entity.HotelAvailability;
 import entity.HotelWithAmenities;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,6 +46,25 @@ public class HotelModel {
     return list;
   }
 
+  List<HotelAvailability> getFromIteratorHotelAvailabilities(ResultSet resultSetFromProcedure)
+      throws SQLException {
+    List<HotelAvailability> list = new ArrayList<>();
+    while (resultSetFromProcedure.next()) {
+      Integer id = Integer.valueOf(resultSetFromProcedure.getString("id"));
+      String roomCategory = resultSetFromProcedure.getString("roomCategory");
+      Integer availableRooms = Integer.valueOf(resultSetFromProcedure.getString("availableRooms"));
+
+      HotelAvailability hotelAvailability = new HotelAvailability().toBuilder()
+          .hotelId(id)
+          .roomCategory(roomCategory)
+          .availableRooms(availableRooms)
+          .build();
+      list.add(hotelAvailability);
+    }
+    return list;
+  }
+
+
   public List<HotelWithAmenities> getAllAvailableHotelsWithAmenities(Date availableHotelsForDate) {
     String query = "call getAvailableHotels(?)";
     ResultSet resultSet = procedureExecutor.preparedStatement(query)
@@ -61,4 +81,43 @@ public class HotelModel {
     return hotelWithAmenities;
   }
 
+  public List<HotelAvailability> getCategoryWiseHotelAvailabilitiesMapForDate(
+      HotelWithAmenities hotel, Date reqStartDate, Date reqEndDate)
+      throws SQLException {
+    String query = "call getHotelCategoryWiseAvailability(?,?,?)";
+    ResultSet resultSet = procedureExecutor.preparedStatement(query)
+        .setStatementParam(1, hotel.getId().toString())
+        .setStatementParam(2, new java.sql.Date(reqStartDate.getTime()).toString())
+        .setStatementParam(3, new java.sql.Date(reqEndDate.getTime()).toString())
+        .execute();
+    List<HotelAvailability> hotelAvailabilities;
+
+    try {
+      hotelAvailabilities = getFromIteratorHotelAvailabilities(resultSet);
+    } catch (Exception e) {
+      throw e;
+    }
+    procedureExecutor.cleanup();
+    return hotelAvailabilities;
+  }
+
+  public void bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
+      String roomCategory) {
+    String query = "call createBooking(?,?,?,?,?,?)";
+    try {
+      procedureExecutor.preparedStatement(query)
+          .setStatementParam(1, hotelId.toString())
+          .setStatementParam(2, customerId.toString())
+          .setStatementParam(3, new java.sql.Date(reqStartDate.getTime()).toString())
+          .setStatementParam(4, new java.sql.Date(reqEndDate.getTime()).toString())
+          .setStatementParam(5, roomCategory)
+          .setStatementParam(6, null)
+          .execute();
+      procedureExecutor.cleanup();
+    } catch (Exception e) {
+      throw e;
+    }
+
+
+  }
 }

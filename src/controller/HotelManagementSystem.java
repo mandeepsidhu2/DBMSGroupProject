@@ -1,5 +1,6 @@
 package controller;
 
+import entity.HotelAvailability;
 import entity.HotelWithAmenities;
 import entity.User;
 import java.sql.Connection;
@@ -78,7 +79,93 @@ public class HotelManagementSystem {
     //todo
   }
 
-  public void displayHotelDetailPage(HotelWithAmenities hotel) {
+  private void getHotelAvailabilityForAHotelForInputDates(HotelWithAmenities hotel, Date startDate,
+      Date endDate) {
+    List<HotelAvailability> hotelAvailabilities;
+    try {
+      hotelAvailabilities = this.hotelModel.
+          getCategoryWiseHotelAvailabilitiesMapForDate(hotel, startDate, endDate);
+    } catch (Exception e) {
+      displayHotelDetailPage(hotel);
+      return;
+    }
+
+    if (hotelAvailabilities.size() == 0) {
+      System.out.println("Sorry no availabilities for given dates! Try a different hotel");
+      displayHotelDetailPage(hotel);
+      return;
+    }
+    System.out.println("Room Option |  Room Type  |  Rooms available");
+    Integer idx = 0;
+    System.out.println();
+
+    for (HotelAvailability hotelAvailability : hotelAvailabilities) {
+      System.out.println(
+          "(" + (idx + 1) + ") | " + hotelAvailability.getRoomCategory() + "     |     "
+              + hotelAvailability.getAvailableRooms());
+      idx++;
+    }
+    System.out.println("Select the room type you would like to book between 1 and " + idx + ""
+        + "\nPress any other key to go back to hotel list");
+    Integer optionSelected = -1;
+    try {
+      optionSelected = inputAnIntFromUser();
+    } catch (Exception ex) {
+      displayHotelDetailPage(hotel);
+      return;
+    }
+    if (optionSelected < 0 || optionSelected > hotelAvailabilities.size()) {
+      System.out.println("Invalid option selected, try again");
+      displayHotelDetailPage(hotel);
+      return;
+    }
+
+    Integer idxOfHotelAvailabilityInArray = optionSelected - 1;
+
+    try {
+      this.hotelModel.bookARoom(this.currentUserContext.getCustomerId(), startDate, endDate,
+          hotel.getId(),
+          hotelAvailabilities.get(idxOfHotelAvailabilityInArray).getRoomCategory()
+      );
+    } catch (Exception e) {
+      System.out.println("Unable to book a room due to error-> " + e.getMessage());
+      System.out.println("Please try again");
+      displayHotelDetailPage(hotel);
+      return;
+    }
+    System.out.println("Congratulations booking created!!");
+    manageUserBookings();
+
+  }
+
+  private void displayHotelDetailPage(HotelWithAmenities hotel) {
+    System.out.println("Welcome to hotel " + hotel.getName());
+    System.out.println(hotel.getStreet() + ", " + hotel.getTown() + ", " + hotel.getState());
+
+    System.out.println(
+        "Enter the start date for the booking you want to create(in YYYY-MM-DD format)...");
+    String startDateString = reader.nextLine();
+    Date startDate = null;
+    try {
+      startDate = new SimpleDateFormat("yyyy-MM-dd").parse(startDateString);
+    } catch (Exception e) {
+      System.out.println("Invalid start date entered!");
+      displayHotelDetailPage(hotel);
+      return;
+    }
+
+    System.out.println(
+        "Enter the end date for the booking you want to create(in YYYY-MM-DD format)...");
+    String endDateString = reader.nextLine();
+    Date endDate = null;
+    try {
+      endDate = new SimpleDateFormat("yyyy-MM-dd").parse(endDateString);
+    } catch (Exception e) {
+      System.out.println("Invalid end date entered!");
+      displayHotelDetailPage(hotel);
+      return;
+    }
+    getHotelAvailabilityForAHotelForInputDates(hotel, startDate, endDate);
 
   }
 
@@ -88,7 +175,7 @@ public class HotelManagementSystem {
       System.out.println("Please enter date in format YYYY-MM-DD");
       String dateInput = reader.nextLine();
       try {
-        dateToQuery = new SimpleDateFormat("YYYY-MM-DD").parse(dateInput);
+        dateToQuery = new SimpleDateFormat("yyyy-MM-dd").parse(dateInput);
       } catch (Exception e) {
         System.out.println("Invalid date enetered!");
         viewUserHotelOptions(false);
@@ -214,7 +301,14 @@ public class HotelManagementSystem {
    */
   public void run() {
     List<Integer> ops = view.firstMessageToUser();
-    Integer optionSelected = inputAnIntFromUser();
+    Integer optionSelected = -1;
+    try {
+      optionSelected = inputAnIntFromUser();
+    } catch (Exception ex) {
+      System.out.println("Invalid input");
+      run();
+      return;
+    }
     if (!ops.contains(optionSelected)) {
       System.out.println("Invalid input");
       run();
