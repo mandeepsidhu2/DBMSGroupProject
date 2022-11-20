@@ -131,19 +131,43 @@ select getTotalRoomsAvailableForHotel(1,CURDATE());
 
 
 
-
+    select rooms.roomno ,rooms.category   from rooms
+        inner join hotel on hotel.id=rooms.hotelid where hotelid=1 and roomno=1;
 
 
 drop procedure if exists createBooking;
 delimiter //
 create procedure createBooking(
 in hotelIdInput int,
-in customerId int,
-in staffId int,
-in roomNo int
+in customerIdInput int,
+in startDateInput date,
+in endDateInput date,
+in roomNoINput int
 )
 	begin
-		
+    -- check if room no and hotel id is valid
+	
+		declare countOfRoomsWithGivenInfo int default 0;
+	   declare bookingsCountOfRoomNoWithinStartAndEndDate int default 0;
+
+        select count(*) into countOfRoomsWithGivenInfo  from rooms
+        inner join hotel on hotel.id=rooms.hotelid where hotelid=hotelIdInput and roomno=roomNoINput;
+        
+
+        if (countOfRoomsWithGivenInfo !=1) then
+        		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Hotel and room id combination is invalid';
+        end if;
+	
+      -- check for other bookings of the same room
+        select count(*) into bookingsCountOfRoomNoWithinStartAndEndDate from bookings where endDate between
+        startDateInput and endDateInput or startDate between startDateInput and endDateInput;
+        
+        if(bookingsCountOfRoomNoWithinStartAndEndDate!=0) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Room already booked in the requested date frame';
+        end if;
+
+        
+		insert into booking (customer,hotel,startDate,endDate,roomNo) values (customerIdInput,hotelIdInput,startDateInput,endDateInput,roomNoINput);
     end //
 delimiter ;
-call getHotelCategoryWiseAvailability(1);
+call createBooking(1,1,curdate(),curdate(),1);
