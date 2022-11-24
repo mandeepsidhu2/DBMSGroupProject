@@ -1,3 +1,4 @@
+use final_project;
 insert into customer (ssn,name,phone,email,age) values("SSN58534","Arun","2323232","da@j.com",12);
 insert into hotel (name,street,town,state,zip,avgrating,phone,email) values
 ("Hotel Plaza","Symphony Street","Truro","MA","02115",0,"+1 656-334-6296","plaza@hmz.com");
@@ -188,7 +189,6 @@ in roomNoInput int
             end if;
 	
 		end if;
-
         
 		insert into booking (customer,hotel,startDate,endDate,roomNo) values (customerIdInput,hotelIdInput,startDateInput,endDateInput,availableRoomNo);
     end //
@@ -198,3 +198,50 @@ delimiter ;
 call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,null,1);
 call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
 
+
+drop procedure if exists getUserBookings;
+delimiter //
+create procedure getUserBookings(in customerId int)
+	begin
+		select * from booking  inner join hotel on hotel.id = booking.hotel where customer=customerId;
+    end //
+delimiter ;
+call getUserBookings(1);
+
+
+drop procedure if exists addOccupantToBooking;
+delimiter //
+create procedure addOccupantToBooking(
+	in bookingIdInput int,
+	in ssnI varchar(45) , 
+    in nameI varchar(45) ,
+    in ageI int)
+	begin
+    declare bookedRoomCapacity int default 0;
+	declare currentNumberOfOccupants int default 0;
+	declare exit handler for SQLEXCEPTION  
+    begin
+		rollback;
+        SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to create occupant, rolling back transaction';
+	end;
+    select capacity into bookedRoomCapacity from booking inner join rooms on  booking.roomNo=rooms.roomno where bookingId=bookingIdInput;
+    if(bookedRoomCapacity is null) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid booking id has been entered';
+    end if;
+	if(currentNumberOfOccupants = bookedRoomCapacity) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'No more occupants can be added to this room type';
+	end if;
+    
+    start transaction;
+		insert into occupant (ssn,name,age) values (ssnI,nameI,ageI);
+        insert into occupantsinorder (bookingId,occuppantSSN) values (bookingIdInput,ssnI);
+    commit;
+    end //
+delimiter ;
+call addOccupantToBooking(1,"SSHK","DF",5);
+
+
+
+
+
+ 
