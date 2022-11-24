@@ -81,14 +81,50 @@ public class HotelManagementSystem {
     this.connection.close();
   }
 
+  private void printBookingDetails(Booking booking) {
+    String startDate = new SimpleDateFormat("dd-MM-yyyy").format(booking.getStartDate());
+    String endDate = new SimpleDateFormat("dd-MM-yyyy").format(booking.getEndDate());
+
+    System.out.println(booking.getBookingId() + "             " + booking.getHotelId() + "      "
+        + startDate + "    " + endDate + "      " + booking.getName() + ", " + booking.getTown()
+        + ", " + booking.getState());
+  }
+
   public void manageUserBookings() {
-    List<Booking> bookingList=null;
+    List<Booking> bookingList = null;
     try {
-      bookingList=this.bookingModel.getBookingsForARoom(this.currentUserContext.getCustomerId());
-    }catch (Exception e){
+      bookingList = this.bookingModel.getBookingsForARoom(this.currentUserContext.getCustomerId());
+    } catch (Exception e) {
       System.out.println("Unable to fetch bookings");
       loggedInUserJourney();
       return;
+    }
+    List<Booking> futureBookings = bookingList.stream()
+        .filter(b -> !b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
+            Collectors.toList());
+    List<Booking> checkedInBookings = bookingList.stream()
+        .filter(b -> b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
+            Collectors.toList());
+    List<Booking> pastBookings = bookingList.stream()
+        .filter(b -> b.getIsCheckedIn() && b.getIsCheckedOut()).collect(
+            Collectors.toList());
+
+    System.out.println("Past bookings:");
+    System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
+    for (Booking booking : pastBookings) {
+      printBookingDetails(booking);
+    }
+
+    System.out.println("Checked in bookings:");
+    System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
+    for (Booking booking : checkedInBookings) {
+      printBookingDetails(booking);
+    }
+
+    System.out.println("Future bookings:");
+    System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
+    for (Booking booking : futureBookings) {
+      printBookingDetails(booking);
     }
     //todo for loop display bookings as, upcming, checked in, past
   }

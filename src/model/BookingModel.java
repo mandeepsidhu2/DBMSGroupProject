@@ -1,7 +1,6 @@
 package model;
 
 import entity.Booking;
-import entity.HotelAvailability;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -24,13 +23,29 @@ public class BookingModel {
       Integer customerId = Integer.valueOf(resultSetFromProcedure.getString("customer"));
       Integer bookingId = Integer.valueOf(resultSetFromProcedure.getString("bookingId"));
       Integer hotelId = Integer.valueOf(resultSetFromProcedure.getString("hotel"));
-      Integer checkedInByStaffId = Integer.valueOf(
-          resultSetFromProcedure.getString("checkedInByStaffId"));
-      Integer checkedOutByStaffId = Integer.valueOf(
-          resultSetFromProcedure.getString("checkedOutByStaffId"));
+
+      String checkinOutByStaffIdString = resultSetFromProcedure.getString("checkedInByStaffId");
+      Integer checkedInByStaffId =
+          checkinOutByStaffIdString == null ? null : Integer.valueOf(checkinOutByStaffIdString);
+
+      String checkedOutByStaffIdString = resultSetFromProcedure.getString("checkedOutByStaffId");
+      Integer checkedOutByStaffId =
+          checkedOutByStaffIdString == null ? null : Integer.valueOf(checkedOutByStaffIdString);
+
+      String ratingString = resultSetFromProcedure.getString("rating");
+      Integer rating = ratingString == null ? null : Integer.valueOf(ratingString);
+
+      String hotelName = resultSetFromProcedure.getString("name");
+      String hotelStreet = resultSetFromProcedure.getString("street");
+      String hotelTown = resultSetFromProcedure.getString("town");
+      String hotelState = resultSetFromProcedure.getString("state");
+      String hotelZip = resultSetFromProcedure.getString("zip");
+      Float hotelAvgRating = Float.parseFloat(resultSetFromProcedure.getString("avgRating"));
+      String hotelPhone = resultSetFromProcedure.getString("phone");
+      String hotelEmail = resultSetFromProcedure.getString("email");
+
       Boolean isCheckedOut = Boolean.valueOf(resultSetFromProcedure.getString("isCheckedOut"));
       Boolean isCheckedIn = Boolean.valueOf(resultSetFromProcedure.getString("isCheckedIn"));
-      Integer rating = Integer.valueOf(resultSetFromProcedure.getString("rating"));
       Integer roomNo = Integer.valueOf(resultSetFromProcedure.getString("roomNo"));
       String ratingDescription = resultSetFromProcedure.getString("ratingDescription");
       Date startDate = null, endDate = null;
@@ -42,7 +57,17 @@ public class BookingModel {
       } catch (Exception e) {
         System.out.println("error in parsing " + e.getMessage());
       }
-      Booking booking = new Booking().toBuilder()
+      Booking booking = new Booking().builder()
+          // hotel details
+          .name(hotelName)
+          .town(hotelTown)
+          .state(hotelState)
+          .street(hotelStreet)
+          .zip(hotelZip)
+          .avgRating(hotelAvgRating)
+          .phone(hotelPhone)
+          .email(hotelEmail)
+          //customer details
           .bookingId(bookingId).customerId(customerId).hotelId(hotelId)
           .checkedInByStaffId(checkedInByStaffId)
           .checkedOutByStaffId(checkedOutByStaffId).isCheckedIn(isCheckedIn)
@@ -71,6 +96,7 @@ public class BookingModel {
     procedureExecutor.cleanup();
     return bookingList;
   }
+
   public void bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
       String roomCategory) {
     String query = "call createBooking(?,?,?,?,?,?)";

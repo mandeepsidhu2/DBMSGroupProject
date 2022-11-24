@@ -2,7 +2,6 @@ package entity;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -10,8 +9,9 @@ import lombok.experimental.SuperBuilder;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
-public class Booking {
+@SuperBuilder
+public class Booking extends Hotel {
+
   private Integer customerId;
   private Integer bookingId;
   private Integer hotelId;
