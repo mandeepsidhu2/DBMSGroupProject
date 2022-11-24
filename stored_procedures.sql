@@ -228,6 +228,7 @@ create procedure addOccupantToBooking(
 	begin
     declare bookedRoomCapacity int default 0;
 	declare currentNumberOfOccupants int default 0;
+    declare occupantSSNExists varchar(45) default null;
 	declare exit handler for SQLEXCEPTION  
     begin
 		rollback;
@@ -242,12 +243,16 @@ create procedure addOccupantToBooking(
 	end if;
     
     start transaction;
-		insert into occupant (ssn,name,age) values (ssnI,nameI,ageI);
+    -- todo check if occupant already exists
+		select ssn into occupantSSNExists from occupant where ssn=ssnI;
+        if(occupantSSNExists is null) then
+        		insert into occupant (ssn,name,age) values (ssnI,nameI,ageI);
+        end if;
         insert into occupantsinorder (bookingId,occuppantSSN) values (bookingIdInput,ssnI);
     commit;
     end //
 delimiter ;
-call addOccupantToBooking(1,"SSHK","DF",5);
+call addOccupantToBooking(1,"SS2K","DF",5);
 
 select * from customer;
 truncate table booking;
@@ -266,7 +271,43 @@ delimiter ;
 call getOccupantDetailsForBooking(1);
 
 
+drop procedure if exists deleteBooking;
+delimiter //
+create procedure deleteBooking(in bookingIdIn int)
+	begin
+    	declare exit handler for SQLEXCEPTION  
+	begin
+		rollback;
+        SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete booking';
+	end;
+		delete from booking where bookingId=bookingIdIn;
+    end //
+delimiter ;
+call deleteBooking(1);
 
 
+drop procedure if exists deleteOccupantFromBooking;
+delimiter //
+create procedure deleteOccupantFromBooking(in ssnI varchar(45),in bookingIdI int)
+	begin
+	declare occupantBookingCount int default 0;
+	declare exit handler for SQLEXCEPTION  
+	begin
+		rollback;
+        SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete booking';
+	end;
+    start transaction;
+		select count(*) into  occupantBookingCount from occupantsinorder where occuppantSSN=ssnI;
+        if (occupantBookingCount = 1) then
+        		delete from occupant where ssn=ssnI;
+        end if;
+        delete from occupantsinorder where occuppantSSN=ssnI;
+	commit;
+    end //
+delimiter ;
+call deleteOccupantFromBooking("SSHK",1);
+
+select * from customer;
+select * from occupant;
 
  

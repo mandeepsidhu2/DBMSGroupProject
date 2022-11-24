@@ -3,6 +3,7 @@ package controller;
 import entity.Booking;
 import entity.HotelAvailability;
 import entity.HotelWithAmenities;
+import entity.Occupant;
 import entity.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -19,6 +20,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 import model.BookingModel;
 import model.HotelModel;
+import model.OccupantModel;
 import model.ProcedureExecutor;
 import model.UserModel;
 import view.View;
@@ -51,6 +53,8 @@ public class HotelManagementSystem {
 
   private final BookingModel bookingModel;
 
+  private final OccupantModel occupantModel;
+
   Scanner reader = new Scanner(System.in);
   private User currentUserContext;
   private Connection connection = null;
@@ -75,6 +79,7 @@ public class HotelManagementSystem {
       userModel = new UserModel(procedureExecutor);
       hotelModel = new HotelModel(procedureExecutor);
       bookingModel = new BookingModel(procedureExecutor);
+      occupantModel = new OccupantModel(procedureExecutor);
     } catch (Exception e) {
       System.out.println(e.getMessage());
       throw new Exception("Invalid username or password was entered, try again\n");
@@ -162,14 +167,76 @@ public class HotelManagementSystem {
     }
   }
 
+  private void cancelBooking(Integer bookingId){
+    try {
+      this.bookingModel.deleteBooking(bookingId);
+    }catch (Exception e){
+      System.out.println("Unable to delete booking due to error "+e.getMessage());
+      return;
+    }
+    System.out.println("The booking has been deleted successfully");
+  }
+
+  private void deleteOccupantFromBooking(Integer bookingId){
+    System.out.println("Enter the ssn of the occupant you want to delete");
+    String ssn= reader.nextLine();
+    try {
+      this.occupantModel.deleteOccupantFromBooking(ssn,bookingId);
+    }catch (Exception e){
+      System.out.println("Unable to delete occupant due to error -> "+e.getMessage());
+      return;
+    }
+  }
   private void modifyBooking(Booking booking){
+    System.out.println("Details for booking id -> "+booking.getBookingId());
+    System.out.println("Booking start date (dd-MM-yyyy)-> "+ new SimpleDateFormat("dd-MM-yyyy").format(booking.getStartDate()));
+    System.out.println("Booking start date (dd-MM-yyyy)-> "+new SimpleDateFormat("dd-MM-yyyy").format(booking.getEndDate()));
+
+    List<Occupant> occupantList;
+    try {
+      occupantList=this.occupantModel.getOccupantDetailsForBooking(booking.getBookingId());
+      System.out.println("Details of occupants are: ");
+      System.out.println("Occupant Name | Occupant SSN | Occupant Age");
+      for(Occupant occupant:occupantList){
+        System.out.println(occupant.getName()+"               "+occupant.getSsn()+"               "+occupant.getAge());
+      }
+
+    }catch (Exception e){
+      System.out.println("Error in fetching occupant list"+e.getMessage());
+    }
+
+    System.out.println();
     // todo display occupant details
     System.out.println("What operation would you like to perform");
-    System.out.println("Delete a booking");
-    System.out.println("Add more occupants");
-    System.out.println("Delete occupants");
-
-
+    System.out.println("(1)Cancel this this booking");
+    System.out.println("(2)Add more occupants");
+    System.out.println("(3)Delete occupants");
+    System.out.println("(4)Go back");
+    Integer option;
+    try {
+      option=inputAnIntFromUser();
+    }catch (Exception e){
+      System.out.println("Invalid option entered");
+      modifyBooking(booking);
+      return;
+    }
+    switch (option){
+      case 1:
+        cancelBooking(booking.getBookingId());
+        modifyBooking(booking);
+        break;
+      case 2:
+        addOccupantsToBooking(booking.getBookingId());
+        modifyBooking(booking);
+        break;
+      case 3:
+        deleteOccupantFromBooking(booking.getBookingId());
+        modifyBooking(booking);
+        break;
+      case 4:
+        manageUserBookings();
+        break;
+    }
 
   }
 
@@ -249,7 +316,7 @@ public class HotelManagementSystem {
     Integer age = inputAnIntFromUser();
 
     try {
-      this.bookingModel.addOccupantToABooking(bookingId,ssn,name,age);
+      this.occupantModel.addOccupantToABooking(bookingId,ssn,name,age);
     }catch (Exception e){
       System.out.println("Unable to create a booking due to error "+e.getMessage());
       manageUserBookings();
@@ -430,6 +497,12 @@ public class HotelManagementSystem {
    * Connect to MySQL and do some stuff.
    */
   public void run() {
+//    try {
+//      this.occupantModel.getOccupantDetailsForBooking(1);
+//
+//    }catch (Exception e){
+//      System.out.println(e.getMessage());
+//    }
     List<Integer> ops = view.firstMessageToUser();
     Integer optionSelected = -1;
     try {

@@ -81,6 +81,14 @@ public class BookingModel {
     return list;
   }
 
+  public void deleteBooking(Integer bookingId){
+    String query = "call deleteBooking(?)";
+    procedureExecutor.preparedStatement(query)
+        .setStatementParam(1, bookingId.toString())
+        .execute();
+
+    procedureExecutor.cleanup();
+  }
   public List<Booking> getBookingsForARoom(Integer customerID) throws SQLException {
     String query = "call getUserBookings(?)";
 
@@ -127,17 +135,5 @@ public class BookingModel {
     }
   }
 
-  public void addOccupantToABooking(Integer bookingId,String occupantSSN,String occupantName,Integer occupantAge){
-    String query= "call addOccupantToBooking(?,?,?,?)";
-    try{
-      procedureExecutor.preparedStatement(query)
-          .setStatementParam(1, bookingId.toString())
-          .setStatementParam(2, occupantSSN)
-          .setStatementParam(3, occupantName)
-          .setStatementParam(4, occupantAge.toString())
-          .execute();
-    }catch (Exception e){
-        throw e;
-    }
-  }
+
 }
