@@ -184,6 +184,7 @@ public class HotelManagementSystem {
       System.out.println("Unable to delete occupant due to error -> " + e.getMessage());
       return;
     }
+    System.out.println("Occupant deleted!!");
   }
 
   private void modifyBooking(Booking booking) {
@@ -212,7 +213,6 @@ public class HotelManagementSystem {
     }
 
     System.out.println();
-    // todo display occupant details
     System.out.println("What operation would you like to perform");
     System.out.println("(1)Cancel this this booking");
     System.out.println("(2)Add more occupants");
@@ -229,7 +229,7 @@ public class HotelManagementSystem {
     switch (option) {
       case 1:
         cancelBooking(booking.getBookingId());
-        modifyBooking(booking);
+        manageUserBookings();
         break;
       case 2:
         addOccupantsToBooking(booking.getBookingId());
@@ -329,15 +329,14 @@ public class HotelManagementSystem {
       manageUserBookings();
       return;
     }
+    System.out.println("Occupant added");
+
 
     System.out.println("To continue occupants to the booking, press y, any other key to add later");
     System.out.println("[Occupants can be added in manage bookings section]");
     String userInput = reader.nextLine();
     if (userInput.equals("y")) {
       addOccupantsToBooking(bookingId);
-      return;
-    } else {
-      manageUserBookings();
       return;
     }
   }

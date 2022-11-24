@@ -265,10 +265,10 @@ drop procedure if exists getOccupantDetailsForBooking;
 delimiter //
 create procedure getOccupantDetailsForBooking(in bookingIdIn int)
 	begin
-		select * from occupantsinorder inner join occupant where bookingid=bookingIdIn;
+		select * from occupantsinorder inner join occupant on occupant.ssn=occupantsinorder.occuppantSSN where bookingid=bookingIdIn;
     end //
 delimiter ;
-call getOccupantDetailsForBooking(1);
+call getOccupantDetailsForBooking(4);
 
 
 drop procedure if exists deleteBooking;
