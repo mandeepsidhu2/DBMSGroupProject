@@ -9,12 +9,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -108,7 +106,7 @@ public class HotelManagementSystem {
       loggedInUserJourney();
       return;
     }
-    if(bookingList.size()==0){
+    if (bookingList.size() == 0) {
       System.out.println("No bookings to display");
       loggedInUserJourney();
       return;
@@ -125,7 +123,7 @@ public class HotelManagementSystem {
         .filter(b -> b.getIsCheckedIn() && b.getIsCheckedOut()).collect(
             Collectors.toList());
 
-    if(pastBookings.size()>0) {
+    if (pastBookings.size() > 0) {
       System.out.println("Past bookings:");
       System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
       for (Booking booking : pastBookings) {
@@ -133,7 +131,7 @@ public class HotelManagementSystem {
       }
     }
 
-    if(checkedInBookings.size()>0) {
+    if (checkedInBookings.size() > 0) {
       System.out.println("Checked in bookings:");
       System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
       for (Booking booking : checkedInBookings) {
@@ -141,68 +139,76 @@ public class HotelManagementSystem {
       }
     }
 
-    if(futureBookings.size()>0) {
+    if (futureBookings.size() > 0) {
       System.out.println("Future bookings:");
       System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
       for (Booking booking : futureBookings) {
         printBookingDetails(booking);
       }
       System.out.println("Enter a future booking id you would like to modify");
-      Integer bookingId ;
+      Integer bookingId;
       try {
         bookingId = inputAnIntFromUser();
-        if(futureBookings.stream().filter(booking -> booking.getBookingId()
-            .equals(bookingId)).collect(Collectors.toList()).size()==0){
+        if (futureBookings.stream().filter(booking -> booking.getBookingId()
+            .equals(bookingId)).collect(Collectors.toList()).size() == 0) {
           throw new IllegalArgumentException("Invalid booking id entered");
         }
-      }catch (Exception e){
+      } catch (Exception e) {
         System.out.println("Invalid input");
         manageUserBookings();
         return;
       }
-      Booking bookingToModify=futureBookings.stream().filter(booking -> booking.getBookingId()
+      Booking bookingToModify = futureBookings.stream().filter(booking -> booking.getBookingId()
           .equals(bookingId)).collect(Collectors.toList()).get(0);
       modifyBooking(bookingToModify);
       return;
     }
   }
 
-  private void cancelBooking(Integer bookingId){
+  private void cancelBooking(Integer bookingId) {
     try {
       this.bookingModel.deleteBooking(bookingId);
-    }catch (Exception e){
-      System.out.println("Unable to delete booking due to error "+e.getMessage());
+    } catch (Exception e) {
+      System.out.println("Unable to delete booking due to error " + e.getMessage());
       return;
     }
     System.out.println("The booking has been deleted successfully");
   }
 
-  private void deleteOccupantFromBooking(Integer bookingId){
+  private void deleteOccupantFromBooking(Integer bookingId) {
     System.out.println("Enter the ssn of the occupant you want to delete");
-    String ssn= reader.nextLine();
+    String ssn = reader.nextLine();
     try {
-      this.occupantModel.deleteOccupantFromBooking(ssn,bookingId);
-    }catch (Exception e){
-      System.out.println("Unable to delete occupant due to error -> "+e.getMessage());
+      this.occupantModel.deleteOccupantFromBooking(ssn, bookingId);
+    } catch (Exception e) {
+      System.out.println("Unable to delete occupant due to error -> " + e.getMessage());
       return;
     }
   }
-  private void modifyBooking(Booking booking){
-    System.out.println("Details for booking id -> "+booking.getBookingId());
-    System.out.println("Booking start date (dd-MM-yyyy)-> "+ new SimpleDateFormat("dd-MM-yyyy").format(booking.getStartDate()));
-    System.out.println("Booking start date (dd-MM-yyyy)-> "+new SimpleDateFormat("dd-MM-yyyy").format(booking.getEndDate()));
+
+  private void modifyBooking(Booking booking) {
+    System.out.println("\n");
+    System.out.println("Details for booking id -> " + booking.getBookingId());
+    System.out.println(
+        "Booking start date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getStartDate()));
+    System.out.println(
+        "Booking end date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getEndDate()));
 
     List<Occupant> occupantList;
     try {
-      occupantList=this.occupantModel.getOccupantDetailsForBooking(booking.getBookingId());
+      occupantList = this.occupantModel.getOccupantDetailsForBooking(booking.getBookingId());
       System.out.println("Details of occupants are: ");
       System.out.println("Occupant Name | Occupant SSN | Occupant Age");
-      for(Occupant occupant:occupantList){
-        System.out.println(occupant.getName()+"               "+occupant.getSsn()+"               "+occupant.getAge());
+      for (Occupant occupant : occupantList) {
+        System.out.println(
+            occupant.getName() + "               " + occupant.getSsn() + "               "
+                + occupant.getAge());
       }
 
-    }catch (Exception e){
-      System.out.println("Error in fetching occupant list"+e.getMessage());
+    } catch (Exception e) {
+      System.out.println("Error in fetching occupant list" + e.getMessage());
     }
 
     System.out.println();
@@ -214,13 +220,13 @@ public class HotelManagementSystem {
     System.out.println("(4)Go back");
     Integer option;
     try {
-      option=inputAnIntFromUser();
-    }catch (Exception e){
+      option = inputAnIntFromUser();
+    } catch (Exception e) {
       System.out.println("Invalid option entered");
       modifyBooking(booking);
       return;
     }
-    switch (option){
+    switch (option) {
       case 1:
         cancelBooking(booking.getBookingId());
         modifyBooking(booking);
@@ -282,9 +288,10 @@ public class HotelManagementSystem {
     }
 
     Integer idxOfHotelAvailabilityInArray = optionSelected - 1;
-    Integer bookingId=null;
+    Integer bookingId = null;
     try {
-      bookingId=this.bookingModel.bookARoom(this.currentUserContext.getCustomerId(), startDate, endDate,
+      bookingId = this.bookingModel.bookARoom(this.currentUserContext.getCustomerId(), startDate,
+          endDate,
           hotel.getId(),
           hotelAvailabilities.get(idxOfHotelAvailabilityInArray).getRoomCategory()
       );
@@ -298,14 +305,14 @@ public class HotelManagementSystem {
     System.out.println("To add occupants to the booking, press y, any other key to add later");
     System.out.println("[Occupants can be added in manage bookings section]");
     String userInput = reader.nextLine();
-    if(userInput.equals("y")){
+    if (userInput.equals("y")) {
       addOccupantsToBooking(bookingId);
-    }else {
+    } else {
       manageUserBookings();
     }
   }
 
-  void addOccupantsToBooking(Integer bookingId){
+  void addOccupantsToBooking(Integer bookingId) {
     System.out.println("Enter occupant ssn");
     String ssn = reader.nextLine();
 
@@ -316,9 +323,9 @@ public class HotelManagementSystem {
     Integer age = inputAnIntFromUser();
 
     try {
-      this.occupantModel.addOccupantToABooking(bookingId,ssn,name,age);
-    }catch (Exception e){
-      System.out.println("Unable to create a booking due to error "+e.getMessage());
+      this.occupantModel.addOccupantToABooking(bookingId, ssn, name, age);
+    } catch (Exception e) {
+      System.out.println("Unable to create a booking due to error " + e.getMessage());
       manageUserBookings();
       return;
     }
@@ -326,10 +333,10 @@ public class HotelManagementSystem {
     System.out.println("To continue occupants to the booking, press y, any other key to add later");
     System.out.println("[Occupants can be added in manage bookings section]");
     String userInput = reader.nextLine();
-    if(userInput.equals("y")){
+    if (userInput.equals("y")) {
       addOccupantsToBooking(bookingId);
       return;
-    }else {
+    } else {
       manageUserBookings();
       return;
     }

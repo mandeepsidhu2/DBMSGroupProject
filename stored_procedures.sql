@@ -298,16 +298,18 @@ create procedure deleteOccupantFromBooking(in ssnI varchar(45),in bookingIdI int
 	end;
     start transaction;
 		select count(*) into  occupantBookingCount from occupantsinorder where occuppantSSN=ssnI;
+		delete from occupantsinorder where occuppantSSN=ssnI;
         if (occupantBookingCount = 1) then
         		delete from occupant where ssn=ssnI;
         end if;
-        delete from occupantsinorder where occuppantSSN=ssnI;
 	commit;
     end //
 delimiter ;
 call deleteOccupantFromBooking("SSHK",1);
 
 select * from customer;
-select * from occupant;
+select * from occupant; 
+select * from occupantsinorder;
+
 
  

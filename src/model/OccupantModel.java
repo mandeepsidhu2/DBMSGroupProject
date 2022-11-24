@@ -1,6 +1,5 @@
 package model;
 
-import entity.HotelAvailability;
 import entity.Occupant;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +20,7 @@ public class OccupantModel {
     while (resultSetFromProcedure.next()) {
       Integer age = Integer.valueOf(resultSetFromProcedure.getString("age"));
       String ssn = resultSetFromProcedure.getString("ssn");
-      String  name = resultSetFromProcedure.getString("name");
+      String name = resultSetFromProcedure.getString("name");
 
       Occupant occupant = new Occupant().toBuilder()
           .age(age)
@@ -34,44 +33,45 @@ public class OccupantModel {
   }
 
   public List<Occupant> getOccupantDetailsForBooking(Integer bookingId) throws SQLException {
-    String query= "call getOccupantDetailsForBooking(?)";
+    String query = "call getOccupantDetailsForBooking(?)";
     List<Occupant> occupantList;
-    try{
-      ResultSet resultSet= procedureExecutor.preparedStatement(query)
+    try {
+      ResultSet resultSet = procedureExecutor.preparedStatement(query)
           .setStatementParam(1, bookingId.toString())
           .execute();
-      occupantList=getFromIteratorOccupantList(resultSet);
+      occupantList = getFromIteratorOccupantList(resultSet);
       procedureExecutor.cleanup();
-    }catch (Exception e){
+    } catch (Exception e) {
       throw e;
     }
     return occupantList;
   }
 
-  public void deleteOccupantFromBooking(String ssn,Integer bookingId) throws SQLException {
-    String query= "call deleteOccupantFromBooking(?,?)";
-    try{
-      ResultSet resultSet= procedureExecutor.preparedStatement(query)
+  public void deleteOccupantFromBooking(String ssn, Integer bookingId) throws SQLException {
+    String query = "call deleteOccupantFromBooking(?,?)";
+    try {
+      ResultSet resultSet = procedureExecutor.preparedStatement(query)
           .setStatementParam(1, ssn)
-          .setStatementParam(2,bookingId.toString())
+          .setStatementParam(2, bookingId.toString())
           .execute();
       procedureExecutor.cleanup();
-    }catch (Exception e){
+    } catch (Exception e) {
       throw e;
     }
   }
 
 
-  public void addOccupantToABooking(Integer bookingId,String occupantSSN,String occupantName,Integer occupantAge){
-    String query= "call addOccupantToBooking(?,?,?,?)";
-    try{
+  public void addOccupantToABooking(Integer bookingId, String occupantSSN, String occupantName,
+      Integer occupantAge) {
+    String query = "call addOccupantToBooking(?,?,?,?)";
+    try {
       procedureExecutor.preparedStatement(query)
           .setStatementParam(1, bookingId.toString())
           .setStatementParam(2, occupantSSN)
           .setStatementParam(3, occupantName)
           .setStatementParam(4, occupantAge.toString())
           .execute();
-    }catch (Exception e){
+    } catch (Exception e) {
       throw e;
     }
   }

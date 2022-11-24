@@ -1,7 +1,6 @@
 package model;
 
 import entity.Booking;
-import entity.HotelWithAmenities;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -81,7 +80,7 @@ public class BookingModel {
     return list;
   }
 
-  public void deleteBooking(Integer bookingId){
+  public void deleteBooking(Integer bookingId) {
     String query = "call deleteBooking(?)";
     procedureExecutor.preparedStatement(query)
         .setStatementParam(1, bookingId.toString())
@@ -89,6 +88,7 @@ public class BookingModel {
 
     procedureExecutor.cleanup();
   }
+
   public List<Booking> getBookingsForARoom(Integer customerID) throws SQLException {
     String query = "call getUserBookings(?)";
 
@@ -108,7 +108,7 @@ public class BookingModel {
 
   Integer getFromIteratorBookingId(ResultSet resultSetFromProcedure)
       throws SQLException {
-    Integer bookingId=null;
+    Integer bookingId = null;
     while (resultSetFromProcedure.next()) {
       bookingId = Integer.valueOf(resultSetFromProcedure.getString("bookingId"));
     }
@@ -127,7 +127,7 @@ public class BookingModel {
           .setStatementParam(5, roomCategory)
           .setStatementParam(6, null)
           .execute();
-      Integer bookingId= getFromIteratorBookingId(resultSet);
+      Integer bookingId = getFromIteratorBookingId(resultSet);
       procedureExecutor.cleanup();
       return bookingId;
     } catch (Exception e) {

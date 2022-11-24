@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class Occupant {
+
   String ssn;
   String name;
   Integer age;
