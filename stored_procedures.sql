@@ -217,6 +217,7 @@ delimiter ;
 call getUserBookings(1);
 
 
+
 drop procedure if exists addOccupantToBooking;
 delimiter //
 create procedure addOccupantToBooking(
@@ -252,6 +253,18 @@ select * from customer;
 truncate table booking;
 select * from occupant;
 select * from occupantsinorder;
+
+
+
+drop procedure if exists getOccupantDetailsForBooking;
+delimiter //
+create procedure getOccupantDetailsForBooking(in bookingIdIn int)
+	begin
+		select * from occupantsinorder inner join occupant where bookingid=bookingIdIn;
+    end //
+delimiter ;
+call getOccupantDetailsForBooking(1);
+
 
 
 

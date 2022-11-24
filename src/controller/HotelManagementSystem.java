@@ -8,6 +8,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -100,9 +103,16 @@ public class HotelManagementSystem {
       loggedInUserJourney();
       return;
     }
+    if(bookingList.size()==0){
+      System.out.println("No bookings to display");
+      loggedInUserJourney();
+      return;
+    }
     List<Booking> futureBookings = bookingList.stream()
         .filter(b -> !b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
             Collectors.toList());
+    Collections.sort(futureBookings, Comparator.comparingInt(Booking::getBookingId));
+
     List<Booking> checkedInBookings = bookingList.stream()
         .filter(b -> b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
             Collectors.toList());
@@ -110,24 +120,57 @@ public class HotelManagementSystem {
         .filter(b -> b.getIsCheckedIn() && b.getIsCheckedOut()).collect(
             Collectors.toList());
 
-    System.out.println("Past bookings:");
-    System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
-    for (Booking booking : pastBookings) {
-      printBookingDetails(booking);
+    if(pastBookings.size()>0) {
+      System.out.println("Past bookings:");
+      System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
+      for (Booking booking : pastBookings) {
+        printBookingDetails(booking);
+      }
     }
 
-    System.out.println("Checked in bookings:");
-    System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
-    for (Booking booking : checkedInBookings) {
-      printBookingDetails(booking);
+    if(checkedInBookings.size()>0) {
+      System.out.println("Checked in bookings:");
+      System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
+      for (Booking booking : checkedInBookings) {
+        printBookingDetails(booking);
+      }
     }
 
-    System.out.println("Future bookings:");
-    System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
-    for (Booking booking : futureBookings) {
-      printBookingDetails(booking);
+    if(futureBookings.size()>0) {
+      System.out.println("Future bookings:");
+      System.out.println("BookingId | HotelId | StartDate   | EndDate   | Hotel Details");
+      for (Booking booking : futureBookings) {
+        printBookingDetails(booking);
+      }
+      System.out.println("Enter a future booking id you would like to modify");
+      Integer bookingId ;
+      try {
+        bookingId = inputAnIntFromUser();
+        if(futureBookings.stream().filter(booking -> booking.getBookingId()
+            .equals(bookingId)).collect(Collectors.toList()).size()==0){
+          throw new IllegalArgumentException("Invalid booking id entered");
+        }
+      }catch (Exception e){
+        System.out.println("Invalid input");
+        manageUserBookings();
+        return;
+      }
+      Booking bookingToModify=futureBookings.stream().filter(booking -> booking.getBookingId()
+          .equals(bookingId)).collect(Collectors.toList()).get(0);
+      modifyBooking(bookingToModify);
+      return;
     }
-    //todo for loop display bookings as, upcming, checked in, past
+  }
+
+  private void modifyBooking(Booking booking){
+    // todo display occupant details
+    System.out.println("What operation would you like to perform");
+    System.out.println("Delete a booking");
+    System.out.println("Add more occupants");
+    System.out.println("Delete occupants");
+
+
+
   }
 
   private void getHotelAvailabilityForAHotelForInputDates(HotelWithAmenities hotel, Date startDate,

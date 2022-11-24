@@ -17,7 +17,7 @@ public class BookingModel {
     this.procedureExecutor = procedureExecutor;
   }
 
-  List<Booking> getFromIteratorHotelWithAmenities(ResultSet resultSetFromProcedure)
+  List<Booking> getFromIteratorBookingWithHotelDetails(ResultSet resultSetFromProcedure)
       throws SQLException {
     List<Booking> list = new ArrayList<>();
     while (resultSetFromProcedure.next()) {
@@ -90,7 +90,7 @@ public class BookingModel {
 
     List<Booking> bookingList;
     try {
-      bookingList = getFromIteratorHotelWithAmenities(resultSet);
+      bookingList = getFromIteratorBookingWithHotelDetails(resultSet);
     } catch (Exception e) {
       throw e;
     }
