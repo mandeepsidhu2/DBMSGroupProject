@@ -141,7 +141,7 @@ select getTotalRoomsAvailableForHotel(1,CURDATE());
 
 
 
-
+select curdate();
 drop procedure if exists createBooking;
 delimiter //
 create procedure createBooking(
@@ -158,6 +158,10 @@ in roomNoInput int
 	   declare countOfRoomsWithGivenInfo int default 0;
 	   declare bookingsCountOfRoomNoWithinStartAndEndDate int default 0;
 	   declare availableRoomNo int default roomNoInput;
+           
+       if(datediff(startDateInput, curdate())< 0 ) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking has to be made in future or for today';
+       end if;
        
        if(datediff(endDateInput,startDateInput)< 1 ) then
 				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'You have to book a room for atleast a day';
@@ -191,10 +195,14 @@ in roomNoInput int
 		end if;
         
 		insert into booking (customer,hotel,startDate,endDate,roomNo) values (customerIdInput,hotelIdInput,startDateInput,endDateInput,availableRoomNo);
+        select bookingId from booking where customer=customerIdInput and hotel=hotelIdInput and startDate=startDateInput
+        and endDate=endDateInput and roomNo=availableRoomNo;
     end //
 delimiter ;
 -- select * from booking;
 -- truncate table booking;
+call createBooking(1,1,curdate()-2,curdate()+ INTERVAL 1 DAY,"Deluxe",null);
+
 call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,null,1);
 call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
 
@@ -240,6 +248,10 @@ create procedure addOccupantToBooking(
 delimiter ;
 call addOccupantToBooking(1,"SSHK","DF",5);
 
+select * from customer;
+truncate table booking;
+select * from occupant;
+select * from occupantsinorder;
 
 
 

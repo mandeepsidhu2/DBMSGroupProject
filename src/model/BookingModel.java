@@ -1,6 +1,7 @@
 package model;
 
 import entity.Booking;
+import entity.HotelWithAmenities;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -97,11 +98,20 @@ public class BookingModel {
     return bookingList;
   }
 
-  public void bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
-      String roomCategory) {
+  Integer getFromIteratorBookingId(ResultSet resultSetFromProcedure)
+      throws SQLException {
+    Integer bookingId=null;
+    while (resultSetFromProcedure.next()) {
+      bookingId = Integer.valueOf(resultSetFromProcedure.getString("bookingId"));
+    }
+    return bookingId;
+  }
+
+  public Integer bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
+      String roomCategory) throws SQLException {
     String query = "call createBooking(?,?,?,?,?,?)";
     try {
-      procedureExecutor.preparedStatement(query)
+      ResultSet resultSet = procedureExecutor.preparedStatement(query)
           .setStatementParam(1, hotelId.toString())
           .setStatementParam(2, customerId.toString())
           .setStatementParam(3, new java.sql.Date(reqStartDate.getTime()).toString())
@@ -109,10 +119,25 @@ public class BookingModel {
           .setStatementParam(5, roomCategory)
           .setStatementParam(6, null)
           .execute();
+      Integer bookingId= getFromIteratorBookingId(resultSet);
       procedureExecutor.cleanup();
+      return bookingId;
     } catch (Exception e) {
       throw e;
     }
+  }
 
+  public void addOccupantToABooking(Integer bookingId,String occupantSSN,String occupantName,Integer occupantAge){
+    String query= "call addOccupantToBooking(?,?,?,?)";
+    try{
+      procedureExecutor.preparedStatement(query)
+          .setStatementParam(1, bookingId.toString())
+          .setStatementParam(2, occupantSSN)
+          .setStatementParam(3, occupantName)
+          .setStatementParam(4, occupantAge.toString())
+          .execute();
+    }catch (Exception e){
+        throw e;
+    }
   }
 }

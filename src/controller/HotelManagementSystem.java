@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -171,9 +172,9 @@ public class HotelManagementSystem {
     }
 
     Integer idxOfHotelAvailabilityInArray = optionSelected - 1;
-
+    Integer bookingId=null;
     try {
-      this.bookingModel.bookARoom(this.currentUserContext.getCustomerId(), startDate, endDate,
+      bookingId=this.bookingModel.bookARoom(this.currentUserContext.getCustomerId(), startDate, endDate,
           hotel.getId(),
           hotelAvailabilities.get(idxOfHotelAvailabilityInArray).getRoomCategory()
       );
@@ -184,8 +185,44 @@ public class HotelManagementSystem {
       return;
     }
     System.out.println("Congratulations booking created!!");
-    manageUserBookings();
+    System.out.println("To add occupants to the booking, press y, any other key to add later");
+    System.out.println("[Occupants can be added in manage bookings section]");
+    String userInput = reader.nextLine();
+    if(userInput.equals("y")){
+      addOccupantsToBooking(bookingId);
+    }else {
+      manageUserBookings();
+    }
+  }
 
+  void addOccupantsToBooking(Integer bookingId){
+    System.out.println("Enter occupant ssn");
+    String ssn = reader.nextLine();
+
+    System.out.println("Enter occupant name");
+    String name = reader.nextLine();
+
+    System.out.println("Enter occupant age");
+    Integer age = inputAnIntFromUser();
+
+    try {
+      this.bookingModel.addOccupantToABooking(bookingId,ssn,name,age);
+    }catch (Exception e){
+      System.out.println("Unable to create a booking due to error "+e.getMessage());
+      manageUserBookings();
+      return;
+    }
+
+    System.out.println("To continue occupants to the booking, press y, any other key to add later");
+    System.out.println("[Occupants can be added in manage bookings section]");
+    String userInput = reader.nextLine();
+    if(userInput.equals("y")){
+      addOccupantsToBooking(bookingId);
+      return;
+    }else {
+      manageUserBookings();
+      return;
+    }
   }
 
   private void displayHotelDetailPage(HotelWithAmenities hotel) {
@@ -227,7 +264,7 @@ public class HotelManagementSystem {
       try {
         dateToQuery = new SimpleDateFormat("yyyy-MM-dd").parse(dateInput);
       } catch (Exception e) {
-        System.out.println("Invalid date enetered!");
+        System.out.println("Invalid date enetred!");
         viewUserHotelOptions(false);
         return;
       }
