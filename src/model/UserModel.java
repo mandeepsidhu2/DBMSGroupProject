@@ -32,23 +32,36 @@ public class UserModel {
     return list;
   }
 
-  public void createUser(User user) {
+  public void createUser(User user) throws SQLException {
     String query = "call createUser(?,?,?,?,?)";
-    procedureExecutor.preparedStatement(query)
-        .setStatementParam(1, user.getSsn())
-        .setStatementParam(2, user.getName())
-        .setStatementParam(3, user.getEmail())
-        .setStatementParam(4, user.getPhone())
-        .setStatementParam(5, user.getAge().toString())
-        .execute();
-    procedureExecutor.cleanup();
+    try {
+      procedureExecutor.preparedStatement(query)
+          .setStatementParam(1, user.getSsn())
+          .setStatementParam(2, user.getName())
+          .setStatementParam(3, user.getEmail())
+          .setStatementParam(4, user.getPhone())
+          .setStatementParam(5, user.getAge().toString())
+          .execute();
+      procedureExecutor.cleanup();
+    }catch (Exception e){
+      procedureExecutor.cleanup();
+      throw e;
+    }
+
     System.out.println("User saved");
   }
 
-  public User getUserBySSN(String ssn) {
+  public User getUserBySSN(String ssn) throws SQLException {
     String query = "call getUserBySSN(?)";
-    ResultSet resultSet = procedureExecutor.preparedStatement(query).setStatementParam(1, ssn)
-        .execute();
+    ResultSet resultSet;
+    try {
+      resultSet = procedureExecutor.preparedStatement(query).setStatementParam(1, ssn)
+          .execute();
+    }catch (Exception e){
+      procedureExecutor.cleanup();
+    throw e;
+    }
+
     List<User> users;
     try {
       users = getFromIterator(resultSet);

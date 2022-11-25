@@ -65,7 +65,8 @@ public class HotelModel {
   }
 
 
-  public List<HotelWithAmenities> getAllAvailableHotelsWithAmenities(Date availableHotelsForDate) {
+  public List<HotelWithAmenities> getAllAvailableHotelsWithAmenities(Date availableHotelsForDate)
+      throws SQLException {
     String query = "call getAvailableHotels(?)";
     ResultSet resultSet = procedureExecutor.preparedStatement(query)
         .setStatementParam(1, new java.sql.Date(availableHotelsForDate.getTime()).toString())
@@ -73,11 +74,12 @@ public class HotelModel {
     List<HotelWithAmenities> hotelWithAmenities;
     try {
       hotelWithAmenities = getFromIteratorHotelWithAmenities(resultSet);
+      procedureExecutor.cleanup();
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       System.out.println(e.getMessage());
       return null;
     }
-    procedureExecutor.cleanup();
     return hotelWithAmenities;
   }
 
@@ -94,10 +96,11 @@ public class HotelModel {
 
     try {
       hotelAvailabilities = getFromIteratorHotelAvailabilities(resultSet);
+      procedureExecutor.cleanup();
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       throw e;
     }
-    procedureExecutor.cleanup();
     return hotelAvailabilities;
   }
 

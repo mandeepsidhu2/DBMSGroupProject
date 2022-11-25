@@ -156,7 +156,7 @@ public class HotelManagementSystem {
         }
       } catch (Exception e) {
         System.out.println("Invalid input");
-        manageUserBookings();
+        loggedInUserJourney();
         return;
       }
       Booking bookingToModify = futureBookings.stream().filter(booking -> booking.getBookingId()
@@ -424,8 +424,15 @@ public class HotelManagementSystem {
         return;
       }
     }
-    List<HotelWithAmenities> hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities(
-        dateToQuery);
+    List<HotelWithAmenities> hotelWithAmenities = null;
+    try {
+      hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities(
+          dateToQuery);
+    }catch (Exception e){
+      viewUserHotelOptions(getAvailabilityToday);
+      System.out.println("Unable to load hotel details");
+      return;
+    }
     String s = "Id |Name        |  Email        |  Phone          | Available Rooms | State| Town  | Street         | Amenities                   | Amenities Description";
     s = String.join("\u0332", s.split("", -1));
     System.out.println(s);
@@ -501,7 +508,7 @@ public class HotelManagementSystem {
   }
 
 
-  public User startUserSignupProcess(String ssn) {
+  public User startUserSignupProcess(String ssn) throws SQLException{
     System.out.println("Enter name");
     String name = reader.nextLine();
 
@@ -521,21 +528,26 @@ public class HotelManagementSystem {
     return this.userModel.getUserBySSN(ssn);
   }
 
-  public void startUserLoginProcess() {
+  public void startUserLoginProcess()  {
     System.out.println("Enter ssn or press x to go back");
     String ssn = reader.nextLine();
     if (ssn.equals("x")) {
       run();
       return;
     }
-    User user = userModel.getUserBySSN(ssn);
-    if (user == null) {
-      System.out.println("User doesn't exist please signup first");
-      user = startUserSignupProcess(ssn);
+    try {
+      User user = userModel.getUserBySSN(ssn);
+      if (user == null) {
+        System.out.println("User doesn't exist please signup first");
+        user = startUserSignupProcess(ssn);
+      }
+      System.out.println("Congratulations, you are now logged in as " + user.getName());
+      this.currentUserContext = user;
+      loggedInUserJourney();
+    }catch (Exception e){
+      System.out.println("Unable to load the user, try again");
+      startUserLoginProcess();
     }
-    System.out.println("Congratulations, you are now logged in as " + user.getName());
-    this.currentUserContext = user;
-    loggedInUserJourney();
   }
 
   /**

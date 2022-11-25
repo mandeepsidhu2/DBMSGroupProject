@@ -80,13 +80,19 @@ public class BookingModel {
     return list;
   }
 
-  public void deleteBooking(Integer bookingId) {
+  public void deleteBooking(Integer bookingId) throws SQLException {
     String query = "call deleteBooking(?)";
-    procedureExecutor.preparedStatement(query)
-        .setStatementParam(1, bookingId.toString())
-        .execute();
+    try {
+      procedureExecutor.preparedStatement(query)
+          .setStatementParam(1, bookingId.toString())
+          .execute();
+      procedureExecutor.cleanup();
+    }catch (SQLException sqlException){
+      procedureExecutor.cleanup();
+      throw sqlException;
+    }
 
-    procedureExecutor.cleanup();
+
   }
 
   public List<Booking> getBookingsForARoom(Integer customerID) throws SQLException {
@@ -99,10 +105,11 @@ public class BookingModel {
     List<Booking> bookingList;
     try {
       bookingList = getFromIteratorBookingWithHotelDetails(resultSet);
+      procedureExecutor.cleanup();
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       throw e;
     }
-    procedureExecutor.cleanup();
     return bookingList;
   }
 
@@ -115,7 +122,8 @@ public class BookingModel {
     return bookingId;
   }
 
-  public void updateBookingDates(Date reqStartDate, Date reqEndDate, Integer bookingId) {
+  public void updateBookingDates(Date reqStartDate, Date reqEndDate, Integer bookingId)
+      throws SQLException {
     String query = "call updateBooking(?,?,?)";
     try {
       procedureExecutor.preparedStatement(query)
@@ -125,6 +133,7 @@ public class BookingModel {
           .execute();
       procedureExecutor.cleanup();
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       throw e;
     }
   }
@@ -145,6 +154,7 @@ public class BookingModel {
       procedureExecutor.cleanup();
       return bookingId;
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       throw e;
     }
   }

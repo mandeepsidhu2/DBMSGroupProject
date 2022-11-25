@@ -39,14 +39,14 @@ public class ProcedureExecutor {
     return this;
   }
 
-  public ResultSet execute() {
+  public ResultSet execute() throws SQLException {
     ResultSet resultSet = null;
     try {
       resultSet = prepareStatementForProcedure.executeQuery();
 
     } catch (SQLException sqlException) {
       System.out.println("Cannot fetch data " + sqlException.getMessage());
-      return null;
+      throw sqlException;
     }
     this.resultSet = resultSet;
     return resultSet;

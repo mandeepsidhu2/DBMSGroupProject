@@ -48,7 +48,7 @@ public class OccupantModel {
     return occupantList;
   }
 
-  public void deleteOccupantFromBooking(String ssn, Integer bookingId) {
+  public void deleteOccupantFromBooking(String ssn, Integer bookingId) throws SQLException {
     String query = "call deleteOccupantFromBooking(?,?)";
     try {
       procedureExecutor.preparedStatement(query)
@@ -64,7 +64,7 @@ public class OccupantModel {
 
 
   public void addOccupantToABooking(Integer bookingId, String occupantSSN, String occupantName,
-      Integer occupantAge) {
+      Integer occupantAge) throws SQLException {
     String query = "call addOccupantToBooking(?,?,?,?)";
     try {
       procedureExecutor.preparedStatement(query)
