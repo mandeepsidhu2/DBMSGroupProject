@@ -115,6 +115,20 @@ public class BookingModel {
     return bookingId;
   }
 
+  public void updateBookingDates(Date reqStartDate, Date reqEndDate, Integer bookingId) {
+    String query = "call updateBooking(?,?,?)";
+    try {
+      procedureExecutor.preparedStatement(query)
+          .setStatementParam(1, new java.sql.Date(reqStartDate.getTime()).toString())
+          .setStatementParam(2, new java.sql.Date(reqEndDate.getTime()).toString())
+          .setStatementParam(3, bookingId.toString())
+          .execute();
+      procedureExecutor.cleanup();
+    } catch (Exception e) {
+      throw e;
+    }
+  }
+
   public Integer bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
       String roomCategory) throws SQLException {
     String query = "call createBooking(?,?,?,?,?,?)";

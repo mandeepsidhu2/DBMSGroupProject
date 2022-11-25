@@ -275,16 +275,22 @@ drop procedure if exists deleteBooking;
 delimiter //
 create procedure deleteBooking(in bookingIdIn int)
 	begin
-    	declare exit handler for SQLEXCEPTION  
-	begin
-		rollback;
-        SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete booking';
-	end;
+		declare isCheckedInVar int default 0;
+	   declare isCheckedOurVar int default 0;
+       declare bookingIdVar int default -1;
+		
+       select bookingId,isCheckedIn,isCheckedOut into bookingIdVar,isCheckedInVar, isCheckedOurVar from
+       booking where bookingId=bookingIdIn;
+       if(bookingIdVar = -1) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+       if(isCheckedInVar or isCheckedOurVar) then
+       SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
+       end if;
 		delete from booking where bookingId=bookingIdIn;
     end //
 delimiter ;
-call deleteBooking(1);
-
+select * from booking;
 
 drop procedure if exists deleteOccupantFromBooking;
 delimiter //
@@ -294,11 +300,14 @@ create procedure deleteOccupantFromBooking(in ssnI varchar(45),in bookingIdI int
 	declare exit handler for SQLEXCEPTION  
 	begin
 		rollback;
-        SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete booking';
+        SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete occupant from booking';
 	end;
     start transaction;
 		select count(*) into  occupantBookingCount from occupantsinorder where occuppantSSN=ssnI;
 		delete from occupantsinorder where occuppantSSN=ssnI;
+        if(occupantBookingCount = 0) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Occupant not found';
+        end if;
         if (occupantBookingCount = 1) then
         		delete from occupant where ssn=ssnI;
         end if;
@@ -307,9 +316,56 @@ create procedure deleteOccupantFromBooking(in ssnI varchar(45),in bookingIdI int
 delimiter ;
 call deleteOccupantFromBooking("SSHK",1);
 
+use final_project;
+drop procedure if  exists updateBooking;
+delimiter //
+	create procedure updateBooking(
+	in startDateInput date,
+	in endDateInput date,
+    in bookingIdInput int
+	)
+	begin
+	   declare isCheckedInVar int default 0;
+	   declare isCheckedOurVar int default 0;
+	   declare roomNoBooked int default -1;
+		declare bookingIdVar int default -1;
+	   declare conflictingBookings int default -1;
+
+       select bookingId,isCheckedIn,isCheckedOut,roomNo into bookingIdVar,isCheckedInVar, isCheckedOurVar,roomNoBooked from
+       booking where bookingId=bookingIdInput;
+       
+       if(bookingIdVar = -1) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+       
+       select count(*) into conflictingBookings from booking where bookingId!=bookingIdInput
+       and roomNo=roomNoBooked and ((startDate between startDateInput
+       and endDateInput) or (endDate between startDateInput and endDateInput));
+       
+        if(conflictingBookings>0) then
+       SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Sorry, room already booked for these dates';
+       end if;
+       
+       if(isCheckedInVar or isCheckedOurVar) then
+       SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
+       end if;
+
+       if(datediff(startDateInput, curdate())< 0 ) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking has to be made in future or for today';
+       end if;
+       
+       if(datediff(endDateInput,startDateInput)< 1 ) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'You have to book a room for atleast a day';
+       end if;
+		update booking set startDate=startDateInput , endDate=endDateInput where bookingId=bookingIdInput;
+	end//
+delimiter ;
+call updateBooking(curdate()+ INTERVAL 8 day,curdate()+ INTERVAL 9 DAY,8);
+use final_project;
+select * from booking;
 select * from customer;
-select * from occupant; 
-select * from occupantsinorder;
+select * from booking; 
+select * from occupant;
 
 
  

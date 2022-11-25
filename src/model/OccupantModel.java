@@ -42,20 +42,22 @@ public class OccupantModel {
       occupantList = getFromIteratorOccupantList(resultSet);
       procedureExecutor.cleanup();
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       throw e;
     }
     return occupantList;
   }
 
-  public void deleteOccupantFromBooking(String ssn, Integer bookingId) throws SQLException {
+  public void deleteOccupantFromBooking(String ssn, Integer bookingId) {
     String query = "call deleteOccupantFromBooking(?,?)";
     try {
-      ResultSet resultSet = procedureExecutor.preparedStatement(query)
+      procedureExecutor.preparedStatement(query)
           .setStatementParam(1, ssn)
           .setStatementParam(2, bookingId.toString())
           .execute();
       procedureExecutor.cleanup();
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       throw e;
     }
   }
@@ -71,7 +73,9 @@ public class OccupantModel {
           .setStatementParam(3, occupantName)
           .setStatementParam(4, occupantAge.toString())
           .execute();
+      procedureExecutor.cleanup();
     } catch (Exception e) {
+      procedureExecutor.cleanup();
       throw e;
     }
   }
