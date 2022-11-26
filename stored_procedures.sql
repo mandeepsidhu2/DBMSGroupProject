@@ -401,12 +401,84 @@ delimiter //
         select new.hotel into hotelIdVar;
         select count(*) into bookingRatedCount from booking where rating is not null and hotel=hotelIdVar;
 		select sum(rating) into totalRating from booking where rating is not null  and hotel=hotelIdVar group by hotel;
+        if(bookingRatedCount!=0) then
         update hotel set avgrating=(totalRating/bookingRatedCount) where id=hotelIdVar;
+        end if;
     end//
 delimiter ;
 
+drop trigger if exists bookingCreatedTrigger;
+delimiter //
+	create trigger	bookingCreatedTrigger
+    after insert on booking
+    for each row
+	begin
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("BOOKING_CREATED",new.bookingId,new.customer,new.hotel,concat("roomNo:",new.roomNo));
+    end//
+delimiter ;
+-- call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
 
+
+drop trigger if exists bookingUpdatedTrigger;
+delimiter //
+	create trigger	bookingUpdatedTrigger
+    after update on booking
+    for each row
+	begin
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("BOOKING_UPDATED",new.bookingId,new.customer,new.hotel,
+        concat("{'roomNo':",new.roomNo,",","'startDate':",new.startDate,",","'endDate':",new.endDate,"}"));
+    end//
+delimiter ;
+-- call updateBooking(curdate()+ INTERVAL 8 day,curdate()+ INTERVAL 9 DAY,1);
+
+drop trigger if exists occupantCreatedTrigger;
+delimiter //
+	create trigger	occupantCreatedTrigger
+    after insert on occupantsinorder
+    for each row
+	begin
+		declare bookingIdVar int default 0;
+        declare hotelIdVar int default 0;
+		declare customerIdVar int default 0;
+		declare occupantNameVar varchar(45) default null;
+		declare occupantAgeVar int default 0;
+
+		select booking.bookingId ,booking.hotel,booking.customer,occupant.age,occupant.name into hotelIdVar,bookingIdVar,customerIdVar,occupantAgeVar,occupantNameVar
+        from booking inner join occupantsinorder using(bookingId) inner join occupant on occupant.ssn=occupantsinorder.occuppantSSN
+        where occupant.ssn=new.occuppantSSN;
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("OCCUPANT_ADDED",bookingIdVar,customerIdVar,hotelIdVar,
+        concat("{'occuppantSSN':",new.occuppantSSN,",","'occupantName':",occupantNameVar,",","'occupantAge':",occupantAgeVar,"}"));
+    end//
+delimiter ;
+call addOccupantToBooking(1,"S221K","DF",1);
+
+drop trigger if exists occupantDeletedTrigger;
+delimiter //
+	create trigger	occupantDeletedTrigger
+    before delete on occupantsinorder
+    for each row
+	begin
+		declare bookingIdVar int default 0;
+        declare hotelIdVar int default 0;
+		declare customerIdVar int default 0;
+		declare occupantNameVar varchar(45) default null;
+		declare occupantAgeVar int default 0;
+
+		select booking.bookingId ,booking.hotel,booking.customer,occupant.age,occupant.name into hotelIdVar,bookingIdVar,customerIdVar,occupantAgeVar,occupantNameVar
+        from booking inner join occupantsinorder using(bookingId) inner join occupant on occupant.ssn=occupantsinorder.occuppantSSN
+        where occupant.ssn=old.occuppantSSN;
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("OCCUPANT_DELETED",bookingIdVar,customerIdVar,hotelIdVar,
+        concat("{'occuppantSSN':",old.occuppantSSN,",","'occupantName':",occupantNameVar,",","'occupantAge':",occupantAgeVar,"}"));
+    end//
+delimiter ;
+-- call deleteOccupantFromBooking("S221K",1);
+
+set foreign_key_checks=0;
 select * from booking;
-select * from hotel;
-select * from booking; 
+select * from customer;
+select * from booking_log; 
 select * from occupant;
