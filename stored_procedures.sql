@@ -361,8 +361,52 @@ delimiter //
 	end//
 delimiter ;
 call updateBooking(curdate()+ INTERVAL 8 day,curdate()+ INTERVAL 9 DAY,8);
+
+
 use final_project;
+drop procedure if  exists addRatingForBooking;
+delimiter //
+	create procedure addRatingForBooking(
+	in bookingIdInput int,
+	in ratingInput float
+	)
+	begin
+		
+	   declare isCheckedOurVar int default -1;
+       select isCheckedOut into  isCheckedOurVar from booking where bookingId=bookingIdInput;
+       if(isCheckedOurVar=-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+		if(isCheckedOurVar=0) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking has to be in checked out status to mark rating';
+       end if;
+       if(ratingInput < 0 or ratingInput >5) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Rating has to be between 0 and 5';
+       end if;
+	update booking set rating=ratingInput where bookingId=bookingIdInput;
+    end//
+delimiter ;
+
+call addRatingForBooking(11,4.5);
+
+drop trigger if exists updateHotelAverageRating;
+delimiter //
+	create trigger	updateHotelAverageRating
+    after update on booking
+    for each row
+	begin
+		declare bookingRatedCount int default 0;
+		declare totalRating float default 0;
+		declare hotelIdVar int default -1;
+        select new.hotel into hotelIdVar;
+        select count(*) into bookingRatedCount from booking where rating is not null and hotel=hotelIdVar;
+		select sum(rating) into totalRating from booking where rating is not null  and hotel=hotelIdVar group by hotel;
+        update hotel set avgrating=(totalRating/bookingRatedCount) where id=hotelIdVar;
+    end//
+delimiter ;
+
+
 select * from booking;
-select * from customer;
+select * from hotel;
 select * from booking; 
 select * from occupant;
