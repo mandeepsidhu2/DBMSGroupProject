@@ -21,7 +21,7 @@ public class Booking extends Hotel {
   private Boolean isCheckedOut;
   private Date startDate;
   private Date endDate;
-  private Integer rating;
+  private Float rating;
   private String ratingDescription;
   private Integer roomNo;
 }

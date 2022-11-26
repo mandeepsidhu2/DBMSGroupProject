@@ -43,7 +43,7 @@ public class UserModel {
           .setStatementParam(5, user.getAge().toString())
           .execute();
       procedureExecutor.cleanup();
-    }catch (Exception e){
+    } catch (Exception e) {
       procedureExecutor.cleanup();
       throw e;
     }
@@ -57,9 +57,9 @@ public class UserModel {
     try {
       resultSet = procedureExecutor.preparedStatement(query).setStatementParam(1, ssn)
           .execute();
-    }catch (Exception e){
+    } catch (Exception e) {
       procedureExecutor.cleanup();
-    throw e;
+      throw e;
     }
 
     List<User> users;

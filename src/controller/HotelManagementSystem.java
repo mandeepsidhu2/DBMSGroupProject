@@ -97,6 +97,7 @@ public class HotelManagementSystem {
         + ", " + booking.getState());
   }
 
+
   public void manageUserBookings() {
     List<Booking> bookingList = null;
     try {
@@ -145,13 +146,19 @@ public class HotelManagementSystem {
       for (Booking booking : futureBookings) {
         printBookingDetails(booking);
       }
+    }
+
+    if (futureBookings.size() > 0 || pastBookings.size() > 0) {
       System.out.println(
-          "Enter a future booking id you would like to modify, any other key to exit");
+          "Enter a booking id you would like to modify, any other key to exit");
       Integer bookingId;
       try {
         bookingId = inputAnIntFromUser();
         if (futureBookings.stream().filter(booking -> booking.getBookingId()
-            .equals(bookingId)).collect(Collectors.toList()).size() == 0) {
+            .equals(bookingId)).collect(Collectors.toList()).size() == 0 &&
+            pastBookings.stream().filter(booking -> booking.getBookingId()
+                .equals(bookingId)).collect(Collectors.toList()).size() == 0
+        ) {
           throw new IllegalArgumentException("Invalid booking id entered");
         }
       } catch (Exception e) {
@@ -159,9 +166,17 @@ public class HotelManagementSystem {
         loggedInUserJourney();
         return;
       }
-      Booking bookingToModify = futureBookings.stream().filter(booking -> booking.getBookingId()
-          .equals(bookingId)).collect(Collectors.toList()).get(0);
-      modifyBooking(bookingToModify);
+      if (futureBookings.stream().filter(booking -> booking.getBookingId()
+          .equals(bookingId)).collect(Collectors.toList()).size() != 0) {
+        Booking bookingToModify = futureBookings.stream().filter(booking -> booking.getBookingId()
+            .equals(bookingId)).collect(Collectors.toList()).get(0);
+        modifyFutureBooking(bookingToModify);
+      } else if (pastBookings.stream().filter(booking -> booking.getBookingId()
+          .equals(bookingId)).collect(Collectors.toList()).size() != 0) {
+        Booking bookingToModify = pastBookings.stream().filter(booking -> booking.getBookingId()
+            .equals(bookingId)).collect(Collectors.toList()).get(0);
+        modifyPastBooking(bookingToModify);
+      }
       return;
     }
   }
@@ -218,7 +233,28 @@ public class HotelManagementSystem {
     System.out.println("The booking has been updated");
   }
 
-  private void modifyBooking(Booking booking) {
+  private void modifyPastBooking(Booking booking) {
+    System.out.println("\n");
+    System.out.println("Details for booking id -> " + booking.getBookingId());
+    System.out.println(
+        "Booking start date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getStartDate()));
+    System.out.println(
+        "Booking end date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getEndDate()));
+    System.out.println("What rating would you like to give for your stay");
+    Float rating = inputAnFloatFromUser();
+    try {
+      this.bookingModel.updateBookingRating(rating, booking.getBookingId());
+      System.out.println("Rating added, thanks for the feedback");
+
+    } catch (Exception e) {
+      System.out.println("Unable to add rating due to error ->" + e.getMessage());
+    }
+    manageUserBookings();
+  }
+
+  private void modifyFutureBooking(Booking booking) {
     System.out.println("\n");
     System.out.println("Details for booking id -> " + booking.getBookingId());
     System.out.println(
@@ -259,7 +295,7 @@ public class HotelManagementSystem {
       option = inputAnIntFromUser();
     } catch (Exception e) {
       System.out.println("Invalid option entered");
-      modifyBooking(booking);
+      modifyFutureBooking(booking);
       return;
     }
     switch (option) {
@@ -428,20 +464,24 @@ public class HotelManagementSystem {
     try {
       hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities(
           dateToQuery);
-    }catch (Exception e){
+    } catch (Exception e) {
       viewUserHotelOptions(getAvailabilityToday);
       System.out.println("Unable to load hotel details");
       return;
     }
-    String s = "Id |Name        |  Email        |  Phone          | Available Rooms | State| Town  | Street         | Amenities                   | Amenities Description";
+    String s = "Id |Name        | AvgRating  |  Email        |  Phone          | Available Rooms | State| Town  | Street         | Amenities                   | Amenities Description";
     s = String.join("\u0332", s.split("", -1));
     System.out.println(s);
     for (HotelWithAmenities hotel : hotelWithAmenities) {
-      System.out.println(hotel.getId() + " | " + hotel.getName() + " | " + hotel.getEmail() + " | "
-          + hotel.getPhone() + " |  " + hotel.getTotalAvailableRooms() + " | " + hotel.getState()
-          + "  | "
-          + hotel.getTown() + " | " + hotel.getStreet() + " | " + hotel.getAmenities() + " | "
-          + hotel.getAmenitiesDescription());
+      String rating = hotel.getAvgRating() == 0 ? "N.A." : hotel.getAvgRating().toString();
+      System.out.println(
+          hotel.getId() + " | " + hotel.getName() + " | " + rating + " | " + hotel.getEmail()
+              + " | "
+              + hotel.getPhone() + " |  " + hotel.getTotalAvailableRooms() + " | "
+              + hotel.getState()
+              + "  | "
+              + hotel.getTown() + " | " + hotel.getStreet() + " | " + hotel.getAmenities() + " | "
+              + hotel.getAmenitiesDescription());
     }
     System.out.println("Enter a hotel id to view further details or press any other key to exit");
     Integer optionSelected;
@@ -481,6 +521,20 @@ public class HotelManagementSystem {
     }
   }
 
+  private Float inputAnFloatFromUser() {
+    float action;
+    try {
+      action = reader.nextFloat();
+      // consume the \n after the int
+      reader.nextLine();
+      return action;
+    } catch (Exception e) {
+      this.view.printExpectedIntegerMessage();
+      reader.nextLine();
+      throw e;
+    }
+  }
+
   public void loggedInUserJourney() {
     List<Integer> options = this.view.printLoggedInUserJourneyOptions();
     Integer option = inputAnIntFromUser();
@@ -508,7 +562,7 @@ public class HotelManagementSystem {
   }
 
 
-  public User startUserSignupProcess(String ssn) throws SQLException{
+  public User startUserSignupProcess(String ssn) throws SQLException {
     System.out.println("Enter name");
     String name = reader.nextLine();
 
@@ -528,7 +582,7 @@ public class HotelManagementSystem {
     return this.userModel.getUserBySSN(ssn);
   }
 
-  public void startUserLoginProcess()  {
+  public void startUserLoginProcess() {
     System.out.println("Enter ssn or press x to go back");
     String ssn = reader.nextLine();
     if (ssn.equals("x")) {
@@ -544,7 +598,7 @@ public class HotelManagementSystem {
       System.out.println("Congratulations, you are now logged in as " + user.getName());
       this.currentUserContext = user;
       loggedInUserJourney();
-    }catch (Exception e){
+    } catch (Exception e) {
       System.out.println("Unable to load the user, try again");
       startUserLoginProcess();
     }

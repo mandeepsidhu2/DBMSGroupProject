@@ -33,7 +33,7 @@ public class BookingModel {
           checkedOutByStaffIdString == null ? null : Integer.valueOf(checkedOutByStaffIdString);
 
       String ratingString = resultSetFromProcedure.getString("rating");
-      Integer rating = ratingString == null ? null : Integer.valueOf(ratingString);
+      Float rating = ratingString == null ? null : Float.valueOf(ratingString);
 
       String hotelName = resultSetFromProcedure.getString("name");
       String hotelStreet = resultSetFromProcedure.getString("street");
@@ -44,8 +44,8 @@ public class BookingModel {
       String hotelPhone = resultSetFromProcedure.getString("phone");
       String hotelEmail = resultSetFromProcedure.getString("email");
 
-      Boolean isCheckedOut = Boolean.valueOf(resultSetFromProcedure.getString("isCheckedOut"));
-      Boolean isCheckedIn = Boolean.valueOf(resultSetFromProcedure.getString("isCheckedIn"));
+      Boolean isCheckedOut = resultSetFromProcedure.getString("isCheckedOut").equals("1");
+      Boolean isCheckedIn = resultSetFromProcedure.getString("isCheckedIn").equals("1");
       Integer roomNo = Integer.valueOf(resultSetFromProcedure.getString("roomNo"));
       String ratingDescription = resultSetFromProcedure.getString("ratingDescription");
       Date startDate = null, endDate = null;
@@ -87,7 +87,7 @@ public class BookingModel {
           .setStatementParam(1, bookingId.toString())
           .execute();
       procedureExecutor.cleanup();
-    }catch (SQLException sqlException){
+    } catch (SQLException sqlException) {
       procedureExecutor.cleanup();
       throw sqlException;
     }
@@ -137,6 +137,22 @@ public class BookingModel {
       throw e;
     }
   }
+
+  public void updateBookingRating(Float rating, Integer bookingId)
+      throws SQLException {
+    String query = "call addRatingForBooking(?,?)";
+    try {
+      procedureExecutor.preparedStatement(query)
+          .setStatementParam(1, bookingId.toString())
+          .setStatementParam(2, rating.toString())
+          .execute();
+      procedureExecutor.cleanup();
+    } catch (Exception e) {
+      procedureExecutor.cleanup();
+      throw e;
+    }
+  }
+
 
   public Integer bookARoom(Integer customerId, Date reqStartDate, Date reqEndDate, Integer hotelId,
       String roomCategory) throws SQLException {
