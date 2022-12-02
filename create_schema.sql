@@ -465,7 +465,7 @@ DROP TABLE IF EXISTS `staff`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `staff` (
-  `staffid` int NOT NULL,
+  `staffid` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `phone` varchar(45) NOT NULL,
   `email` varchar(45) DEFAULT NULL,
@@ -978,4 +978,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-26 14:32:22
+-- Dump completed on 2022-12-02 17:25:19
