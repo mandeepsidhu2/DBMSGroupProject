@@ -604,6 +604,28 @@ public class HotelManagementSystem {
     }
   }
 
+  public void startHotelStaffProcess() {
+    System.out.println("Welcome to hotel-staff portal.\n" +
+            "Here you can handle all the bookings for customers at your hotel.\n");
+    int hotelId, staffId;
+    System.out.println("Enter the hotel id:");
+    try{
+      hotelId = inputAnIntFromUser();
+    }
+    catch (Exception e) {
+      view.printExpectedIntegerMessage();
+    }
+    System.out.println("Enter the staff id:");
+    try{
+      staffId = inputAnIntFromUser();
+    }
+    catch (Exception e) {
+      view.printExpectedIntegerMessage();
+    }
+
+
+  }
+
   /**
    * Connect to MySQL and do some stuff.
    */
@@ -633,7 +655,7 @@ public class HotelManagementSystem {
         startUserLoginProcess();
         break;
       case 2:
-        // todo hotel view
+        startHotelStaffProcess();
         break;
       case 3:
         return;
