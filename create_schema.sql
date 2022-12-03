@@ -111,7 +111,7 @@ CREATE TABLE `booking` (
 
 LOCK TABLES `booking` WRITE;
 /*!40000 ALTER TABLE `booking` DISABLE KEYS */;
-INSERT INTO `booking` VALUES (1,1,1,NULL,1,1,'2022-12-09 00:00:00','2022-12-11 00:00:00',NULL,NULL,1,NULL);
+INSERT INTO `booking` VALUES (1,1,1,1,1,1,'2022-12-09 00:00:00','2022-12-11 00:00:00',NULL,NULL,1,2);
 /*!40000 ALTER TABLE `booking` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -513,7 +513,6 @@ CREATE TABLE `staff` (
                          `email` varchar(45) DEFAULT NULL,
                          `ssn` varchar(45) NOT NULL,
                          `ismanager` tinyint NOT NULL,
-                         `iscontractstaff` tinyint NOT NULL,
                          `contractstartdate` date DEFAULT NULL,
                          `contractenddate` date DEFAULT NULL,
                          `hotelid` int NOT NULL,
@@ -521,7 +520,7 @@ CREATE TABLE `staff` (
                          UNIQUE KEY `ssn_UNIQUE` (`ssn`),
                          KEY `staff_fk_hotel_idx` (`hotelid`),
                          CONSTRAINT `staff_fk_hotel` FOREIGN KEY (`hotelid`) REFERENCES `hotel` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -530,6 +529,7 @@ CREATE TABLE `staff` (
 
 LOCK TABLES `staff` WRITE;
 /*!40000 ALTER TABLE `staff` DISABLE KEYS */;
+INSERT INTO `staff` VALUES (1,'Arun','+1767-287-4851','arun@hms.coom','ssn13',0,NULL,NULL,1),(5,'Mandeep','+1767-287-4851','arun@hms.coom','ssn15',1,NULL,NULL,1),(6,'Ujwal','+1767-287-4851','arun@hms.coom','ssn14',1,NULL,NULL,1);
 /*!40000 ALTER TABLE `staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -651,6 +651,71 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `checkinBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkinBooking`(
+	in bookingIdInput int,
+    in staffIdInput int)
+begin
+	   declare isCheckedInVar int default -1;
+	   declare isCheckedOutVar int default -1;
+select isCheckedIn,isCheckedOut into isCheckedInVar,isCheckedOutVar from booking where bookingId = bookingIdInput;
+if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+end if;
+	  if( isCheckedInVar =1 or isCheckedOutVar =1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking already checked in/out';
+end if;
+update booking set isCheckedIn=1 ,checkedInByStaffId=staffIdInput where bookingId=bookingIdInput;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `checkoutBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkoutBooking`(
+	in bookingIdInput int,
+       in staffIdInput int)
+begin
+	   declare isCheckedInVar int default -1;
+	   declare isCheckedOutVar int default -1;
+select isCheckedIn,isCheckedOut into isCheckedInVar,isCheckedOutVar from booking where bookingId = bookingIdInput;
+if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+end if;
+	  if( isCheckedInVar !=1 ) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is not checked in';
+end if;
+
+		if( isCheckedOutVar =1 ) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is already checked out';
+end if;
+
+update booking set isCheckedOut=1,checkedOutByStaffId=staffIdInput where bookingId=bookingIdInput;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `createBooking` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -714,6 +779,36 @@ end if;
 insert into booking (customer,hotel,startDate,endDate,roomNo) values (customerIdInput,hotelIdInput,startDateInput,endDateInput,availableRoomNo);
 select bookingId from booking where customer=customerIdInput and hotel=hotelIdInput and startDate=startDateInput
                                 and endDate=endDateInput and roomNo=availableRoomNo;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `createStaff` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createStaff`(
+	in nameInput varchar(45),
+    in phoneInput varchar(45),
+    in emailInput varchar(45),
+	in ssnInput varchar(45),
+	in ismanagerInput tinyint,
+    in contractStartDateInput date,
+	in contractEndDateInput date,
+	in hotelidInput int
+    )
+begin
+insert into staff (name,phone,email,ssn,ismanager,contractstartdate,contractenddate,hotelid)
+values
+    (nameInput,phoneInput,emailInput,ssnInput,ismanagerInput,contractStartDateInput,contractEndDateInput,hotelidInput);
 end ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1020,4 +1115,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-02 19:34:15
+-- Dump completed on 2022-12-02 20:13:20

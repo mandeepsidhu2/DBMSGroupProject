@@ -243,7 +243,7 @@ create procedure addOccupantToBooking(
 	end if;
     
     start transaction;
-t		select ssn into occupantSSNExists from occupant where ssn=ssnI;
+		select ssn into occupantSSNExists from occupant where ssn=ssnI;
         if(occupantSSNExists is null) then
         		insert into occupant (ssn,name,age) values (ssnI,nameI,ageI);
         end if;
@@ -514,7 +514,8 @@ delimiter ;
 drop procedure if exists checkinBooking;
 delimiter //
 create procedure checkinBooking(
-	in bookingIdInput int)
+	in bookingIdInput int,
+    in staffIdInput int)
 	begin
 	   declare isCheckedInVar int default -1;
 	   declare isCheckedOutVar int default -1;
@@ -525,15 +526,17 @@ create procedure checkinBooking(
 	  if( isCheckedInVar =1 or isCheckedOutVar =1) then
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking already checked in/out';
        end if;
-       update booking set isCheckedIn=1 where bookingId=bookingIdInput;
+       update booking set isCheckedIn=1 ,checkedInByStaffId=staffIdInput where bookingId=bookingIdInput;
     end //
 delimiter ;
-call checkinBooking(1);
+call checkinBooking(1,1);
+
 
 drop procedure if exists checkoutBooking;
 delimiter //
 create procedure checkoutBooking(
-	in bookingIdInput int)
+	in bookingIdInput int,
+       in staffIdInput int)
 	begin
 	   declare isCheckedInVar int default -1;
 	   declare isCheckedOutVar int default -1;
@@ -549,11 +552,34 @@ create procedure checkoutBooking(
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is already checked out';
        end if;
        
-       update booking set isCheckedOut=1 where bookingId=bookingIdInput;
+       update booking set isCheckedOut=1,checkedOutByStaffId=staffIdInput where bookingId=bookingIdInput;
     end //
 delimiter ;
-call checkoutBooking(1);
+call checkoutBooking(1,2);
 
+
+drop procedure if exists createStaff;
+delimiter //
+create procedure createStaff(
+	in nameInput varchar(45),
+    in phoneInput varchar(45),
+    in emailInput varchar(45),
+	in ssnInput varchar(45),
+	in ismanagerInput tinyint,
+    in contractStartDateInput date,
+	in contractEndDateInput date,
+	in hotelidInput int
+    )
+	begin
+    insert into staff (name,phone,email,ssn,ismanager,contractstartdate,contractenddate,hotelid)
+    values
+    (nameInput,phoneInput,emailInput,ssnInput,ismanagerInput,contractStartDateInput,contractEndDateInput,hotelidInput);
+    end //
+delimiter ;
+call createStaff("Arun","+1767-287-4851","arun@hms.coom","ssn13",0,null,null,1);
+call createStaff("Ujwal","+1767-287-4851","arun@hms.coom","ssn14",1,null,null,1);
+call createStaff("Mandeep","+1767-287-4851","arun@hms.coom","ssn15",1,null,null,1);
+select * from staff;
 
 
 select * from booking;
