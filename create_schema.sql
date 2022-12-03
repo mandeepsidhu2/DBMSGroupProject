@@ -520,7 +520,7 @@ CREATE TABLE `staff` (
                          UNIQUE KEY `ssn_UNIQUE` (`ssn`),
                          KEY `staff_fk_hotel_idx` (`hotelid`),
                          CONSTRAINT `staff_fk_hotel` FOREIGN KEY (`hotelid`) REFERENCES `hotel` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -529,7 +529,7 @@ CREATE TABLE `staff` (
 
 LOCK TABLES `staff` WRITE;
 /*!40000 ALTER TABLE `staff` DISABLE KEYS */;
-INSERT INTO `staff` VALUES (1,'Arun','+1767-287-4851','arun@hms.coom','ssn13',0,NULL,NULL,1),(5,'Mandeep','+1767-287-4851','arun@hms.coom','ssn15',1,NULL,NULL,1),(6,'Ujwal','+1767-287-4851','arun@hms.coom','ssn14',1,NULL,NULL,1);
+INSERT INTO `staff` VALUES (5,'Mandeep','+1767-287-4851','arun@hms.coom','ssn15',1,NULL,NULL,1),(6,'Ujwal','+1767-287-4851','arun@hms.coom','ssn14',1,NULL,NULL,1),(12,'Ram','+1767-287-4851','arun@hms.coom','ssn16',0,NULL,NULL,1);
 /*!40000 ALTER TABLE `staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -905,6 +905,41 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `deleteStaff` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteStaff`(
+	in managerIdInput int,
+    in staffIdToDelete int
+    )
+begin
+	  declare managerHotelId int default -1;
+	  declare staffHotelId int default -1;
+select hotelid into managerHotelId from staff where staffid = managerIdInput;
+select hotelid into staffHotelId from staff where staffid = staffIdToDelete;
+if(managerHotelId = -1) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid manager hotel id';
+end if;
+	 if(staffHotelId = -1) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid staff hotel id';
+end if;
+	if(managerHotelId != staffHotelId ) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Mismatch between staff and manager hotel id';
+end if;
+delete from staff where staffid=staffIdToDelete;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `getAvailableHotels` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1157,4 +1192,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-02 20:15:51
+-- Dump completed on 2022-12-02 20:37:07

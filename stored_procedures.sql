@@ -601,7 +601,34 @@ create procedure getStaffById(
     end //
 delimiter ;
 
+
+drop procedure if exists deleteStaff;
+delimiter //
+create procedure deleteStaff(
+	in managerIdInput int,
+    in staffIdToDelete int
+    )
+	begin
+	  declare managerHotelId int default -1;
+	  declare staffHotelId int default -1;
+	  select hotelid into managerHotelId from staff where staffid = managerIdInput;
+	  select hotelid into staffHotelId from staff where staffid = staffIdToDelete;
+      if(managerHotelId = -1) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid manager hotel id';
+      end if;
+	 if(staffHotelId = -1) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid staff hotel id';
+      end if;
+	if(managerHotelId != staffHotelId ) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Mismatch between staff and manager hotel id';
+      end if;
+	delete from staff where staffid=staffIdToDelete;
+    end //
+delimiter ;
+call deleteStaff(5,11);
+delete from staff where staffid=1;
+call createStaff("Ram","+1767-287-4851","arun@hms.coom","ssn16",0,null,null,1);
+select * from staff; 
 select * from booking;
 select * from customer;
-select * from booking_log; 
 select * from hotel;
