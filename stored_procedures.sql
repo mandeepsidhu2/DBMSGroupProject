@@ -522,8 +522,12 @@ create procedure checkinBooking(
     in staffIdInput int)
 	begin
 	   declare isCheckedInVar int default -1;
+	   declare startDateVar date default null;
 	   declare isCheckedOutVar int default -1;
-       select isCheckedIn,isCheckedOut into isCheckedInVar,isCheckedOutVar from booking where bookingId = bookingIdInput;
+       select isCheckedIn,isCheckedOut,startDate into isCheckedInVar,isCheckedOutVar,startDateVar from booking where bookingId = bookingIdInput;
+       if(datediff(startDateVar,curdate()) !=0) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking can be checked in only on start date';
+       end if;
        if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
        end if;
@@ -534,7 +538,7 @@ create procedure checkinBooking(
     end //
 delimiter ;
 call checkinBooking(1,1);
-
+select * from booking;
 
 drop procedure if exists checkoutBooking;
 delimiter //
@@ -555,12 +559,13 @@ create procedure checkoutBooking(
 		if( isCheckedOutVar =1 ) then
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is already checked out';
        end if;
-       
-       update booking set isCheckedOut=1,checkedOutByStaffId=staffIdInput where bookingId=bookingIdInput;
+		update booking set isCheckedOut=1,checkedOutByStaffId=staffIdInput,endDate=curdate() where bookingId=bookingIdInput;
+     
     end //
 delimiter ;
 call checkoutBooking(1,2);
 
+select * from booking;
 
 drop procedure if exists createStaff;
 delimiter //
@@ -644,7 +649,8 @@ delimiter ;
 call deleteStaff(5,11);
 delete from staff where staffid=1;
 call createStaff("Ram","+1767-287-4851","arun@hms.coom","ssn16",0,null,null,1);
+
 select * from staff; 
-select * from booking;
+select * from booking_log;
 select * from customer;
 select * from hotel;

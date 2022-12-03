@@ -111,7 +111,7 @@ CREATE TABLE `booking` (
 
 LOCK TABLES `booking` WRITE;
 /*!40000 ALTER TABLE `booking` DISABLE KEYS */;
-INSERT INTO `booking` VALUES (1,1,1,1,1,1,'2022-12-09 00:00:00','2022-12-11 00:00:00',NULL,NULL,1,2);
+INSERT INTO `booking` VALUES (1,1,1,1,1,1,'2022-12-02 00:00:00','2022-12-02 00:00:00',NULL,NULL,1,2);
 /*!40000 ALTER TABLE `booking` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -247,7 +247,7 @@ CREATE TABLE `booking_log` (
 
 LOCK TABLES `booking_log` WRITE;
 /*!40000 ALTER TABLE `booking_log` DISABLE KEYS */;
-INSERT INTO `booking_log` VALUES ('CHECKED_IN',1,1,'roomNo:1',1),('CHECKED_OUT',1,1,'roomNo:1',1);
+INSERT INTO `booking_log` VALUES ('CHECKED_IN',1,1,'roomNo:1',1),('CHECKED_OUT',1,1,'roomNo:1',1),('CHECKED_IN',1,1,'roomNo:1',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-09 00:00:00,\'endDate\':2022-12-02 00:00:00}',1),('CHECKED_OUT',1,1,'roomNo:1',1),('CHECKED_OUT',1,1,'roomNo:1',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-09 00:00:00,\'endDate\':2022-12-10 00:00:00}',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-02 00:00:00,\'endDate\':2022-12-10 00:00:00}',1),('CHECKED_IN',1,1,'roomNo:1',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-02 00:00:00,\'endDate\':2022-12-02 00:00:00}',1),('CHECKED_OUT',1,1,'roomNo:1',1);
 /*!40000 ALTER TABLE `booking_log` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -666,8 +666,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkinBooking`(
     in staffIdInput int)
 begin
 	   declare isCheckedInVar int default -1;
+	   declare startDateVar date default null;
 	   declare isCheckedOutVar int default -1;
-       select isCheckedIn,isCheckedOut into isCheckedInVar,isCheckedOutVar from booking where bookingId = bookingIdInput;
+       select isCheckedIn,isCheckedOut,startDate into isCheckedInVar,isCheckedOutVar,startDateVar from booking where bookingId = bookingIdInput;
+       if(datediff(startDateVar,curdate()) !=0) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking can be checked in only on start date';
+       end if;
        if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
        end if;
@@ -708,8 +712,8 @@ begin
 		if( isCheckedOutVar =1 ) then
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is already checked out';
        end if;
-       
-       update booking set isCheckedOut=1,checkedOutByStaffId=staffIdInput where bookingId=bookingIdInput;
+		update booking set isCheckedOut=1,checkedOutByStaffId=staffIdInput,endDate=curdate() where bookingId=bookingIdInput;
+     
     end ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1213,4 +1217,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-02 21:20:19
+-- Dump completed on 2022-12-02 21:45:42
