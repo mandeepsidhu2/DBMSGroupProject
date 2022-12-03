@@ -388,6 +388,9 @@ delimiter ;
 
 call addRatingForBooking(11,4.5);
 
+
+
+
 drop trigger if exists updateHotelAverageRating;
 delimiter //
 	create trigger	updateHotelAverageRating
@@ -508,7 +511,52 @@ delimiter //
 delimiter ;
 
 
+drop procedure if exists checkinBooking;
+delimiter //
+create procedure checkinBooking(
+	in bookingIdInput int)
+	begin
+	   declare isCheckedInVar int default -1;
+	   declare isCheckedOutVar int default -1;
+       select isCheckedIn,isCheckedOut into isCheckedInVar,isCheckedOutVar from booking where bookingId = bookingIdInput;
+       if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+	  if( isCheckedInVar =1 or isCheckedOutVar =1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking already checked in/out';
+       end if;
+       update booking set isCheckedIn=1 where bookingId=bookingIdInput;
+    end //
+delimiter ;
+call checkinBooking(1);
+
+drop procedure if exists checkoutBooking;
+delimiter //
+create procedure checkoutBooking(
+	in bookingIdInput int)
+	begin
+	   declare isCheckedInVar int default -1;
+	   declare isCheckedOutVar int default -1;
+       select isCheckedIn,isCheckedOut into isCheckedInVar,isCheckedOutVar from booking where bookingId = bookingIdInput;
+       if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+	  if( isCheckedInVar !=1 ) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is not checked in';
+       end if;
+       
+		if( isCheckedOutVar =1 ) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is already checked out';
+       end if;
+       
+       update booking set isCheckedOut=1 where bookingId=bookingIdInput;
+    end //
+delimiter ;
+call checkoutBooking(1);
+
+
+
 select * from booking;
 select * from customer;
 select * from booking_log; 
-select * from occupant;
+select * from hotel;
