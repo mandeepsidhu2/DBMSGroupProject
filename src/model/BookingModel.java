@@ -1,6 +1,8 @@
 package model;
 
 import entity.Booking;
+import entity.Staff;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -170,6 +172,106 @@ public class BookingModel {
       procedureExecutor.cleanup();
       return bookingId;
     } catch (Exception e) {
+      procedureExecutor.cleanup();
+      throw e;
+    }
+  }
+
+  public List<Booking> getBookingsForHotel(Integer hotelId) throws SQLException {
+    String query = "call getBookingsForHotel(?)";
+    List<Booking> bookingList = null;
+    try {
+      ResultSet resultSet = procedureExecutor.preparedStatement(query)
+              .setStatementParam(1, hotelId.toString())
+              .execute();
+      bookingList = getFromIteratorForBookings(resultSet);
+      procedureExecutor.cleanup();
+    } catch (Exception e) {
+      procedureExecutor.cleanup();
+      throw e;
+    }
+    return bookingList;
+  }
+
+  private List<Booking> getFromIteratorForBookings(ResultSet resultSetFromProcedure) throws SQLException {
+    List<Booking> bookingList = new ArrayList<>();
+    while( resultSetFromProcedure.next()) {
+      Integer customerId = Integer.valueOf(resultSetFromProcedure.getString("customer"));
+      Integer bookingId = Integer.valueOf(resultSetFromProcedure.getString("bookingId"));
+      Integer hotelId = Integer.valueOf(resultSetFromProcedure.getString("hotel"));
+
+      String checkinOutByStaffIdString = resultSetFromProcedure.getString("checkedInByStaffId");
+      Integer checkedInByStaffId =
+              checkinOutByStaffIdString == null ? null : Integer.valueOf(checkinOutByStaffIdString);
+
+      String checkedOutByStaffIdString = resultSetFromProcedure.getString("checkedOutByStaffId");
+      Integer checkedOutByStaffId =
+              checkedOutByStaffIdString == null ? null : Integer.valueOf(checkedOutByStaffIdString);
+
+      Boolean isCheckedOut = resultSetFromProcedure.getString("isCheckedOut").equals("1");
+      Boolean isCheckedIn = resultSetFromProcedure.getString("isCheckedIn").equals("1");
+
+      Date startDate = null, endDate = null;
+      try {
+        startDate = new SimpleDateFormat("yyyy-MM-dd").parse(
+                resultSetFromProcedure.getString("startDate"));
+        endDate = new SimpleDateFormat("yyyy-MM-dd").parse(
+                resultSetFromProcedure.getString("endDate"));
+      } catch (Exception e) {
+        System.out.println("error in parsing " + e.getMessage());
+      }
+      String ratingString = resultSetFromProcedure.getString("rating");
+      Float rating = ratingString == null ? null : Float.valueOf(ratingString);
+
+      String ratingDescription = resultSetFromProcedure.getString("ratingDescription");
+      Integer roomNo = Integer.valueOf(resultSetFromProcedure.getString("roomNo"));
+
+      Booking booking = new Booking().builder()
+              //customer details
+              .bookingId(bookingId)
+              .customerId(customerId)
+              .hotelId(hotelId)
+              .checkedInByStaffId(checkedInByStaffId)
+              .checkedOutByStaffId(checkedOutByStaffId)
+              .isCheckedIn(isCheckedIn)
+              .isCheckedOut(isCheckedOut)
+              .rating(rating).roomNo(roomNo)
+              .ratingDescription(ratingDescription)
+              .startDate(startDate)
+              .endDate(endDate)
+              .build();
+      bookingList.add(booking);
+    }
+    return bookingList;
+  }
+
+
+  public void checkInBooking(Integer bookingId, Integer staffId) throws SQLException {
+    String query = "call checkinBooking(?, ?)";
+    try {
+      ResultSet resultSet =  procedureExecutor.preparedStatement(query)
+              .setStatementParam(1, bookingId.toString())
+              .setStatementParam(2, staffId.toString())
+              .execute();
+      procedureExecutor.cleanup();
+    }
+    catch (Exception e) {
+      procedureExecutor.cleanup();
+      throw e;
+    }
+  }
+
+  public void checkOutBooking(Integer bookingId, Integer staffId) throws SQLException {
+    String query = "call checkoutBooking(?, ?)";
+    List<Staff> staffDataList;
+    try {
+      ResultSet resultSet =  procedureExecutor.preparedStatement(query)
+              .setStatementParam(1, bookingId.toString())
+              .setStatementParam(2, staffId.toString())
+              .execute();
+      procedureExecutor.cleanup();
+    }
+    catch (Exception e) {
       procedureExecutor.cleanup();
       throw e;
     }

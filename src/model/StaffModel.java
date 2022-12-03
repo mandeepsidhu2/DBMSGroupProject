@@ -17,16 +17,30 @@ public class StaffModel {
   }
 
   private List<Staff> getFromIteratorStaffList(ResultSet resultSetFromProcedure) throws SQLException {
-    List<Occupant> list = new ArrayList<>();
+    List<Staff> list = new ArrayList<>();
     while (resultSetFromProcedure.next()) {
-      Integer age = Integer.valueOf(resultSetFromProcedure.getString("age"));
-      String ssn = resultSetFromProcedure.getString("ssn");
+      Integer staffId = Integer.valueOf(resultSetFromProcedure.getString("staffId"));
       String name = resultSetFromProcedure.getString("name");
+      String phone = resultSetFromProcedure.getString("phone");
+      String email = resultSetFromProcedure.getString("email");
+      String ssn = resultSetFromProcedure.getString("ssn");
+      Integer isManager = Integer.valueOf(resultSetFromProcedure.getString("isManager"));
+      Integer isContractStaff = Integer.valueOf(resultSetFromProcedure.getString("isContractStaff"));
+      String contractStartDate = resultSetFromProcedure.getString("contractStartDate");
+      String contractEndDate = resultSetFromProcedure.getString("contractEndDate");
+      Integer hotelId = Integer.valueOf(resultSetFromProcedure.getString("hotelId"));
 
       Staff staff = new Staff().toBuilder()
-              .age(age)
+              .staffId(staffId)
               .name(name)
+              .phone(phone)
+              .email(email)
               .ssn(ssn)
+              .isManager(isManager)
+              .isContractStaff(isContractStaff)
+              .contractStartDate(contractStartDate)
+              .contractEndDate(contractEndDate)
+              .hotelId(hotelId)
               .build();
       list.add(staff);
     }
@@ -34,21 +48,21 @@ public class StaffModel {
   }
 
 
-  public List<Staff> isStaffManager(Integer staffId) throws SQLException {
-    String query = "call isStaffManager(?)";
-    List<Staff> staffManagerList;
+  public List<Staff> getStaffData(Integer staffId) throws SQLException {
+    String query = "call getStaffById(?)";
+    List<Staff> staffDataList;
     try {
       ResultSet resultSet =  procedureExecutor.preparedStatement(query)
               .setStatementParam(1, staffId.toString())
               .execute();
-      staffManagerList = getFromIteratorStaffList(resultSet);
+      staffDataList = getFromIteratorStaffList(resultSet);
       procedureExecutor.cleanup();
     }
     catch (Exception e) {
       procedureExecutor.cleanup();
       throw e;
     }
-    return staffManagerList;
+    return staffDataList;
   }
 
 }

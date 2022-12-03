@@ -9,7 +9,7 @@ public class View {
     System.out.println("Welcome to the portal!");
     System.out.println("What would you like to do?\n(1) Login as a user");
     System.out.println("(2) Login as hotel staff");
-    System.out.println("(2) Press 3 to exit");
+    System.out.println("(3) Press 3 to exit");
     System.out.println("Press 1, 2 or 3");
     return Arrays.asList(1, 2, 3);
   }

@@ -11,11 +11,15 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 public class Staff {
 
-  private String ssn;
+  private Integer staffId;
   private String name;
   private String phone;
   private String email;
-  private Integer age;
-  private Integer customerId;
+  private String ssn;
+  private Integer isManager;
+  private Integer isContractStaff;
+  private String contractStartDate;
+  private String contractEndDate;
+  private Integer hotelId;
 
 }
