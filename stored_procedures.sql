@@ -243,8 +243,7 @@ create procedure addOccupantToBooking(
 	end if;
     
     start transaction;
-    -- todo check if occupant already exists
-		select ssn into occupantSSNExists from occupant where ssn=ssnI;
+t		select ssn into occupantSSNExists from occupant where ssn=ssnI;
         if(occupantSSNExists is null) then
         		insert into occupant (ssn,name,age) values (ssnI,nameI,ageI);
         end if;
@@ -420,17 +419,7 @@ delimiter ;
 -- call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
 
 
-drop trigger if exists bookingUpdatedTrigger;
-delimiter //
-	create trigger	bookingUpdatedTrigger
-    after update on booking
-    for each row
-	begin
-        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
-        ("BOOKING_UPDATED",new.bookingId,new.customer,new.hotel,
-        concat("{'roomNo':",new.roomNo,",","'startDate':",new.startDate,",","'endDate':",new.endDate,"}"));
-    end//
-delimiter ;
+
 -- call updateBooking(curdate()+ INTERVAL 8 day,curdate()+ INTERVAL 9 DAY,1);
 
 drop trigger if exists occupantCreatedTrigger;
@@ -477,7 +466,48 @@ delimiter //
 delimiter ;
 -- call deleteOccupantFromBooking("S221K",1);
 
-set foreign_key_checks=0;
+drop trigger if exists bookingUpdatedTrigger;
+delimiter //
+	create trigger	bookingUpdatedTrigger
+    after update on booking
+    for each row
+	begin
+		if new.startDate != old.startDate or new.endDate != old.endDate then
+			insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+			("BOOKING_UPDATED",new.bookingId,new.customer,new.hotel,
+			concat("{'roomNo':",new.roomNo,",","'startDate':",new.startDate,",","'endDate':",new.endDate,"}"));
+        end if;
+    end//
+delimiter ;
+
+drop trigger if exists bookingCheckedInTrigger;
+delimiter //
+	create trigger	bookingCheckedInTrigger
+    after update on booking
+    for each row
+	begin
+    if(new.isCheckedIn = 1 and old.isCheckedIn = 0) then
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("CHECKED_IN",new.bookingId,new.customer,new.hotel,concat("roomNo:",new.roomNo));
+	end if;
+    end//
+delimiter ;
+
+
+drop trigger if exists bookingCheckedOutTrigger;
+delimiter //
+	create trigger	bookingCheckedOutTrigger
+    after update on booking
+    for each row
+	begin
+    if(new.isCheckedOut = 1 and old.isCheckedOut = 0) then
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("CHECKED_OUT",new.bookingId,new.customer,new.hotel,concat("roomNo:",new.roomNo));
+	end if;
+    end//
+delimiter ;
+
+
 select * from booking;
 select * from customer;
 select * from booking_log; 
