@@ -43,6 +43,10 @@ insert into amenitiesathotel (hotelid,amenityId) values (1,4);
 insert into amenitiesathotel (hotelid,amenityId) values (2,1);
 insert into amenitiesathotel (hotelid,amenityId) values (2,3);
 
+INSERT INTO `staff` VALUES (1,'Mandeep','+1767-287-4851','arun@hms.coom','ssn1',1,NULL,NULL,1)
+,(2,'Ujwal','+1767-287-4851','arun@hms.coom','ssn2',0,NULL,NULL,2),
+(3,'Ram','+1767-287-4851','arun@hms.coom','ssn3',0,NULL,NULL,1);
+
 drop table amenitiesathotel;
 
 select * from hotel;
@@ -600,6 +604,18 @@ create procedure getStaffById(
         select * from staff where staffid = staffId_in;
     end //
 delimiter ;
+
+drop procedure if exists getStaffListForHotel;
+delimiter //
+create procedure getStaffListForHotel(
+    in hotelIdInput int
+    )
+    begin
+        select * from staff where hotelid = hotelIdInput;
+    end //
+delimiter ;
+call getStaffListForHotel(2);
+
 
 
 drop procedure if exists deleteStaff;
