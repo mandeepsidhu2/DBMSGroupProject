@@ -581,6 +581,25 @@ call createStaff("Ujwal","+1767-287-4851","arun@hms.coom","ssn14",1,null,null,1)
 call createStaff("Mandeep","+1767-287-4851","arun@hms.coom","ssn15",1,null,null,1);
 select * from staff;
 
+drop procedure if exists getBookingsForHotel;
+delimiter //
+create procedure getBookingsForHotel(
+    in hotelId_in int
+    )
+    begin
+        select * from booking where hotel = hotelId_in;
+    end //
+delimiter ;
+
+drop procedure if exists getStaffById;
+delimiter //
+create procedure getStaffById(
+    in staffId_in int
+    )
+    begin
+        select * from staff where staffid = staffId_in;
+    end //
+delimiter ;
 
 select * from booking;
 select * from customer;
