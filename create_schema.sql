@@ -102,7 +102,7 @@ CREATE TABLE `booking` (
   CONSTRAINT `room_fk` FOREIGN KEY (`roomNo`) REFERENCES `rooms` (`roomNo`),
   CONSTRAINT `staff_checkin_fk` FOREIGN KEY (`checkedInByStaffId`) REFERENCES `staff` (`staffid`),
   CONSTRAINT `staff_checkout_fk` FOREIGN KEY (`checkedOutByStaffId`) REFERENCES `staff` (`staffid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -111,7 +111,7 @@ CREATE TABLE `booking` (
 
 LOCK TABLES `booking` WRITE;
 /*!40000 ALTER TABLE `booking` DISABLE KEYS */;
-INSERT INTO `booking` VALUES (1,1,1,1,1,1,'2022-12-02 00:00:00','2022-12-02 00:00:00',NULL,NULL,1,2);
+INSERT INTO `booking` VALUES (1,1,1,1,1,1,'2022-12-02 00:00:00','2022-12-02 00:00:00',5,NULL,1,2),(1,19,1,NULL,1,1,'2022-12-04 00:00:00','2022-12-05 00:00:00',4.5,NULL,1,NULL);
 /*!40000 ALTER TABLE `booking` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -231,13 +231,7 @@ CREATE TABLE `booking_log` (
   `bookingId` int NOT NULL,
   `customerId` int NOT NULL,
   `metaData` varchar(100) DEFAULT NULL,
-  `hotelId` int DEFAULT NULL,
-  KEY `fkBooking_idx` (`bookingId`),
-  KEY `fkCustomer_idx` (`customerId`),
-  KEY `fkHotel_idx` (`hotelId`),
-  CONSTRAINT `fkBooking` FOREIGN KEY (`bookingId`) REFERENCES `booking` (`bookingId`),
-  CONSTRAINT `fkCustomer` FOREIGN KEY (`customerId`) REFERENCES `customer` (`customer_id`),
-  CONSTRAINT `fkHotel` FOREIGN KEY (`hotelId`) REFERENCES `hotel` (`id`)
+  `hotelId` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -247,7 +241,7 @@ CREATE TABLE `booking_log` (
 
 LOCK TABLES `booking_log` WRITE;
 /*!40000 ALTER TABLE `booking_log` DISABLE KEYS */;
-INSERT INTO `booking_log` VALUES ('CHECKED_IN',1,1,'roomNo:1',1),('CHECKED_OUT',1,1,'roomNo:1',1),('CHECKED_IN',1,1,'roomNo:1',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-09 00:00:00,\'endDate\':2022-12-02 00:00:00}',1),('CHECKED_OUT',1,1,'roomNo:1',1),('CHECKED_OUT',1,1,'roomNo:1',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-09 00:00:00,\'endDate\':2022-12-10 00:00:00}',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-02 00:00:00,\'endDate\':2022-12-10 00:00:00}',1),('CHECKED_IN',1,1,'roomNo:1',1),('BOOKING_UPDATED',1,1,'{\'roomNo\':1,\'startDate\':2022-12-02 00:00:00,\'endDate\':2022-12-02 00:00:00}',1),('CHECKED_OUT',1,1,'roomNo:1',1);
+INSERT INTO `booking_log` VALUES ('BOOKING_CREATED',3,8,'roomNo:5',1),('BOOKING_CREATED',4,8,'roomNo:1',1),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':SSN55,\'occupantName\':Manac,\'occupantAge\':12}',4),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':SSN55,\'occupantName\':Manac,\'occupantAge\':12}',4),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':hh,\'occupantName\':hh,\'occupantAge\':12}',4),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':hh,\'occupantName\':hh,\'occupantAge\':12}',4),('BOOKING_CREATED',5,8,'roomNo:1',1),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':hh,\'occupantName\':hh,\'occupantAge\':12}',5),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':SSN343,\'occupantName\':rw,\'occupantAge\':12}',5),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':hh,\'occupantName\':hh,\'occupantAge\':12}',5),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':SSN343,\'occupantName\':rw,\'occupantAge\':12}',5),('BOOKING_CREATED',6,8,'roomNo:1',1),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':ssj,\'occupantName\':sj,\'occupantAge\':12}',6),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':ssj,\'occupantName\':sj,\'occupantAge\':12}',6),('BOOKING_CREATED',7,8,'roomNo:1',1),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':ff,\'occupantName\':ff,\'occupantAge\':12}',7),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':ff,\'occupantName\':ff,\'occupantAge\':12}',7),('BOOKING_CREATED',8,8,'roomNo:1',1),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':SSNhh,\'occupantName\':hh,\'occupantAge\':12}',8),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':SSNhh,\'occupantName\':hh,\'occupantAge\':12}',8),('BOOKING_CREATED',9,1,'roomNo:1',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN22,\'occupantName\':DF,\'occupantAge\':12}',9),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN22,\'occupantName\':DF,\'occupantAge\':12}',9),('BOOKING_CREATED',10,1,'roomNo:2',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN22,\'occupantName\':DF,\'occupantAge\':12}',9),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',10),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',10),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN22,\'occupantName\':DF,\'occupantAge\':12}',9),('BOOKING_CREATED',11,1,'roomNo:1',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',11),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',11),('BOOKING_CREATED',12,1,'roomNo:1',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',12),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',12),('BOOKING_CREATED',13,1,'roomNo:2',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',13),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',13),('BOOKING_CREATED',14,1,'roomNo:2',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',14),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',14),('BOOKING_CREATED',15,1,'roomNo:1',1),('BOOKING_CREATED',16,1,'roomNo:1',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',16),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN22,\'occupantName\':DF,\'occupantAge\':12}',16),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN24,\'occupantName\':DF,\'occupantAge\':12}',16),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN25,\'occupantName\':DF,\'occupantAge\':12}',16),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN21,\'occupantName\':DF,\'occupantAge\':12}',16),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN22,\'occupantName\':DF,\'occupantAge\':12}',16),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN24,\'occupantName\':DF,\'occupantAge\':12}',16),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN25,\'occupantName\':DF,\'occupantAge\':12}',16),('BOOKING_CREATED',17,1,'roomNo:1',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN25,\'occupantName\':DF,\'occupantAge\':12}',17),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN26,\'occupantName\':DF,\'occupantAge\':12}',17),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN27,\'occupantName\':DF,\'occupantAge\':12}',17),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN28,\'occupantName\':DF,\'occupantAge\':12}',17),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN25,\'occupantName\':DF,\'occupantAge\':12}',17),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN26,\'occupantName\':DF,\'occupantAge\':12}',17),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN27,\'occupantName\':DF,\'occupantAge\':12}',17),('OCCUPANT_DELETED',1,1,'{\'occuppantSSN\':SSN28,\'occupantName\':DF,\'occupantAge\':12}',17),('BOOKING_CREATED',18,9,'roomNo:8',2),('OCCUPANT_ADDED',2,9,'{\'occuppantSSN\':hh,\'occupantName\':hh,\'occupantAge\':12}',18),('OCCUPANT_ADDED',2,9,'{\'occuppantSSN\':jj,\'occupantName\':jj,\'occupantAge\':23}',18),('BOOKING_UPDATED',18,9,'{\'roomNo\':8,\'startDate\':2022-12-19 00:00:00,\'endDate\':2022-12-20 00:00:00}',2),('OCCUPANT_DELETED',2,9,'{\'occuppantSSN\':hh,\'occupantName\':hh,\'occupantAge\':12}',18),('OCCUPANT_DELETED',2,9,'{\'occuppantSSN\':jj,\'occupantName\':jj,\'occupantAge\':23}',18),('BOOKING_CREATED',19,1,'roomNo:1',1),('OCCUPANT_ADDED',1,1,'{\'occuppantSSN\':SSN28,\'occupantName\':DF,\'occupantAge\':12}',19),('CHECKED_IN',19,1,'roomNo:1',1),('CHECKED_OUT',19,1,'roomNo:1',1);
 /*!40000 ALTER TABLE `booking_log` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -267,7 +261,7 @@ CREATE TABLE `customer` (
   `age` int DEFAULT NULL,
   PRIMARY KEY (`customer_id`),
   UNIQUE KEY `ssn_UNIQUE` (`ssn`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -276,7 +270,7 @@ CREATE TABLE `customer` (
 
 LOCK TABLES `customer` WRITE;
 /*!40000 ALTER TABLE `customer` DISABLE KEYS */;
-INSERT INTO `customer` VALUES (1,'SSN58534','Arun','2323232','da@j.com',12),(2,'SSN13987','Pde','kjwn!lmk','238928',13),(3,'SSN82402','Mandora','kdsl@jn.ciom','313981',23),(5,'SSN2929','Paul','mwkjn@jkn.com','3989283',23),(6,'SSN0182398','Laura','la@uwd.com','12793109',42),(7,'SSN12345','Ujwal','uj@g.com','4982977',25);
+INSERT INTO `customer` VALUES (1,'SSN58534','Arun','2323232','da@j.com',12),(2,'SSN13987','Pde','kjwn!lmk','238928',13),(3,'SSN82402','Mandora','kdsl@jn.ciom','313981',23),(5,'SSN2929','Paul','mwkjn@jkn.com','3989283',23),(6,'SSN0182398','Laura','la@uwd.com','12793109',42),(7,'SSN12345','Ujwal','uj@g.com','4982977',25),(8,'SSN22','Henry','h@g.com','+1982000342',23),(9,'ss','man','ne','12133131',12);
 /*!40000 ALTER TABLE `customer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -308,7 +302,7 @@ CREATE TABLE `hotel` (
 
 LOCK TABLES `hotel` WRITE;
 /*!40000 ALTER TABLE `hotel` DISABLE KEYS */;
-INSERT INTO `hotel` VALUES (1,'Hotel Plaza','Symphony Street','Truro','MA','02115',4.46667,'+1 656-334-6296','plaza@hmz.com'),(2,'Hotel Banquet','Harrison Street','Truro','MA','02115',0,'+1 616-334-6296','banquet@hmz.com');
+INSERT INTO `hotel` VALUES (1,'Hotel Plaza','Symphony Street','Truro','MA','02115',4.75,'+1 656-334-6296','plaza@hmz.com'),(2,'Hotel Banquet','Harrison Street','Truro','MA','02115',0,'+1 616-334-6296','banquet@hmz.com');
 /*!40000 ALTER TABLE `hotel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -356,6 +350,7 @@ CREATE TABLE `occupant` (
 
 LOCK TABLES `occupant` WRITE;
 /*!40000 ALTER TABLE `occupant` DISABLE KEYS */;
+INSERT INTO `occupant` VALUES ('SSN28','DF',12);
 /*!40000 ALTER TABLE `occupant` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -382,6 +377,7 @@ CREATE TABLE `occupantsinorder` (
 
 LOCK TABLES `occupantsinorder` WRITE;
 /*!40000 ALTER TABLE `occupantsinorder` DISABLE KEYS */;
+INSERT INTO `occupantsinorder` VALUES (19,'SSN28');
 /*!40000 ALTER TABLE `occupantsinorder` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -856,19 +852,38 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteBooking`(in bookingIdIn int)
 begin
-		declare isCheckedInVar int default 0;
-	   declare isCheckedOurVar int default 0;
-       declare bookingIdVar int default -1;
-		
-       select bookingId,isCheckedIn,isCheckedOut into bookingIdVar,isCheckedInVar, isCheckedOurVar from
-       booking where bookingId=bookingIdIn;
-       if(bookingIdVar = -1) then
-			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
-       end if;
-       if(isCheckedInVar or isCheckedOurVar) then
-       SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
-       end if;
-		delete from booking where bookingId=bookingIdIn;
+	declare isCheckedInVar int default 0;
+	declare isCheckedOurVar int default 0;
+	declare bookingIdVar int default -1;
+	declare occupantSSNVar varchar(45) default null;
+	declare row_not_found tinyint default false;
+    declare occupantIterator cursor for select ssn from occupant ;
+	declare continue handler for not found set row_not_found = true;
+	declare exit handler for SQLEXCEPTION  
+ 	 begin
+		rollback;
+          SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete booking, rolling back transaction';
+  	end;
+	start transaction;
+		open occupantIterator;
+			 while row_not_found = false do
+				fetch occupantIterator into occupantSSNVar;
+				if occupantSSNVar is not null then
+					call deleteOccupantFromBooking(occupantSSNVar,bookingIdIn);
+				end if;
+			 end while;
+		close occupantIterator;
+	
+		select bookingId,isCheckedIn,isCheckedOut into bookingIdVar,isCheckedInVar, isCheckedOurVar from
+		   booking where bookingId=bookingIdIn;
+		   if(bookingIdVar = -1) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+		   end if;
+		   if(isCheckedInVar or isCheckedOurVar) then
+		   SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
+		   end if;
+		 delete from booking where bookingId=bookingIdIn;
+	commit;
     end ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -887,21 +902,14 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteOccupantFromBooking`(in ssnI varchar(45),in bookingIdI int)
 begin
-	declare occupantBookingCount int default 0;
 	declare exit handler for SQLEXCEPTION  
 	begin
 		rollback;
         SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete occupant from booking';
 	end;
     start transaction;
-		select count(*) into  occupantBookingCount from occupantsinorder where occuppantSSN=ssnI;
 		delete from occupantsinorder where occuppantSSN=ssnI;
-        if(occupantBookingCount = 0) then
-			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Occupant not found';
-        end if;
-        if (occupantBookingCount = 1) then
-        		delete from occupant where ssn=ssnI;
-        end if;
+	    delete from occupant where ssn=ssnI;
 	commit;
     end ;;
 DELIMITER ;
@@ -1217,4 +1225,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-02 21:45:42
+-- Dump completed on 2022-12-04 16:20:49

@@ -255,10 +255,10 @@ create procedure addOccupantToBooking(
     commit;
     end //
 delimiter ;
-call addOccupantToBooking(1,"SS2K","DF",5);
+call addOccupantToBooking(4,"SSN22","DF",5);
 
 select * from customer;
-truncate table booking;
+select * from booking;
 select * from occupant;
 select * from occupantsinorder;
 
@@ -273,51 +273,74 @@ create procedure getOccupantDetailsForBooking(in bookingIdIn int)
 delimiter ;
 call getOccupantDetailsForBooking(4);
 
-
 drop procedure if exists deleteBooking;
 delimiter //
 create procedure deleteBooking(in bookingIdIn int)
 	begin
-		declare isCheckedInVar int default 0;
-	   declare isCheckedOurVar int default 0;
-       declare bookingIdVar int default -1;
-		
-       select bookingId,isCheckedIn,isCheckedOut into bookingIdVar,isCheckedInVar, isCheckedOurVar from
-       booking where bookingId=bookingIdIn;
-       if(bookingIdVar = -1) then
-			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
-       end if;
-       if(isCheckedInVar or isCheckedOurVar) then
-       SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
-       end if;
-		delete from booking where bookingId=bookingIdIn;
+	declare isCheckedInVar int default 0;
+	declare isCheckedOurVar int default 0;
+	declare bookingIdVar int default -1;
+	declare occupantSSNVar varchar(45) default null;
+	declare row_not_found tinyint default false;
+    declare occupantIterator cursor for select ssn from occupant ;
+	declare continue handler for not found set row_not_found = true;
+	declare exit handler for SQLEXCEPTION  
+ 	 begin
+		rollback;
+          SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete booking, rolling back transaction';
+  	end;
+	start transaction;
+		open occupantIterator;
+			 while row_not_found = false do
+				fetch occupantIterator into occupantSSNVar;
+				if occupantSSNVar is not null then
+					call deleteOccupantFromBooking(occupantSSNVar,bookingIdIn);
+				end if;
+			 end while;
+		close occupantIterator;
+	
+		select bookingId,isCheckedIn,isCheckedOut into bookingIdVar,isCheckedInVar, isCheckedOurVar from
+		   booking where bookingId=bookingIdIn;
+		   if(bookingIdVar = -1) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+		   end if;
+		   if(isCheckedInVar or isCheckedOurVar) then
+		   SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
+		   end if;
+		 delete from booking where bookingId=bookingIdIn;
+	commit;
     end //
 delimiter ;
-select * from booking;
+
+call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
+call addOccupantToBooking(19,"SSN28","DF",12);
+call deleteBooking(17);
+
+select * from booking_log;
+select * from hotel;
+select * from customer;
+select * from occupantsinorder;
+
+
 
 drop procedure if exists deleteOccupantFromBooking;
 delimiter //
 create procedure deleteOccupantFromBooking(in ssnI varchar(45),in bookingIdI int)
 	begin
-	declare occupantBookingCount int default 0;
 	declare exit handler for SQLEXCEPTION  
 	begin
 		rollback;
         SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete occupant from booking';
 	end;
     start transaction;
-		select count(*) into  occupantBookingCount from occupantsinorder where occuppantSSN=ssnI;
 		delete from occupantsinorder where occuppantSSN=ssnI;
-        if(occupantBookingCount = 0) then
-			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Occupant not found';
-        end if;
-        if (occupantBookingCount = 1) then
-        		delete from occupant where ssn=ssnI;
-        end if;
+	    delete from occupant where ssn=ssnI;
 	commit;
     end //
 delimiter ;
-call deleteOccupantFromBooking("SSHK",1);
+call deleteOccupantFromBooking("SSN55",8);
+select * from occupantsinorder;
+select * from customer;
 
 use final_project;
 drop procedure if  exists updateBooking;
