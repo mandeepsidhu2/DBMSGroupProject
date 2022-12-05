@@ -188,7 +188,7 @@ in roomNoInput int
 			end if;
         else -- choise first available room, if a specific room was not requested by the function call
 			select roomNo into availableRoomNo from rooms where rooms.hotelid=hotelIdInput and rooms.category=roomCategory and not exists(
-            select * from booking where roomNo=rooms.roomNo and (endDate between
+            select * from booking where roomNo=rooms.roomNo and  isCheckedOut=0 and (endDate between
 			startDateInput and endDateInput or startDate between startDateInput and endDateInput)
             ) limit 1;
             
@@ -312,9 +312,6 @@ create procedure deleteBooking(in bookingIdIn int)
     end //
 delimiter ;
 
-call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
-call addOccupantToBooking(19,"SSN28","DF",12);
-call deleteBooking(17);
 
 select * from booking_log;
 select * from hotel;
@@ -446,7 +443,7 @@ delimiter //
         ("BOOKING_CREATED",new.bookingId,new.customer,new.hotel,concat("roomNo:",new.roomNo));
     end//
 delimiter ;
--- call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
+ call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
 
 
 
@@ -502,7 +499,7 @@ delimiter //
     after update on booking
     for each row
 	begin
-		if new.startDate != old.startDate or new.endDate != old.endDate then
+		if datediff(new.startDate,old.startDate)!=0 or datediff(new.endDate,old.endDate)!=0 then
 			insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
 			("BOOKING_UPDATED",new.bookingId,new.customer,new.hotel,
 			concat("{'roomNo':",new.roomNo,",","'startDate':",new.startDate,",","'endDate':",new.endDate,"}"));
@@ -518,7 +515,7 @@ delimiter //
 	begin
     if(new.isCheckedIn = 1 and old.isCheckedIn = 0) then
         insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
-        ("CHECKED_IN",new.bookingId,new.customer,new.hotel,concat("roomNo:",new.roomNo));
+        ("CHECKED_IN",new.bookingId,new.customer,new.hotel,concat("{roomNo:",new.roomNo,",checkedInByStaffId:",new.checkedInByStaffId,"}"));
 	end if;
     end//
 delimiter ;
@@ -532,7 +529,7 @@ delimiter //
 	begin
     if(new.isCheckedOut = 1 and old.isCheckedOut = 0) then
         insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
-        ("CHECKED_OUT",new.bookingId,new.customer,new.hotel,concat("roomNo:",new.roomNo));
+        ("CHECKED_OUT",new.bookingId,new.customer,new.hotel,concat("{roomNo:",new.roomNo,",checkedOutByStaffId:",new.checkedOutByStaffId,"}"));
 	end if;
     end//
 delimiter ;
@@ -547,7 +544,16 @@ create procedure checkinBooking(
 	   declare isCheckedInVar int default -1;
 	   declare startDateVar date default null;
 	   declare isCheckedOutVar int default -1;
-       select isCheckedIn,isCheckedOut,startDate into isCheckedInVar,isCheckedOutVar,startDateVar from booking where bookingId = bookingIdInput;
+	   declare bookingHotelIdVar int default -1;
+	   declare staffHotelIdVar int default -1;
+
+       select isCheckedIn,isCheckedOut,startDate,hotel into isCheckedInVar,isCheckedOutVar,startDateVar,bookingHotelIdVar from booking where bookingId = bookingIdInput;
+       select hotelid into staffHotelIdVar from staff where staffid=staffIdInput;
+       
+	   if(bookingHotelIdVar != staffHotelIdVar) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Staff does not belong to this hotel';
+       end if;
+       
        if(datediff(startDateVar,curdate()) !=0) then
 				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking can be checked in only on start date';
        end if;
@@ -571,7 +577,15 @@ create procedure checkoutBooking(
 	begin
 	   declare isCheckedInVar int default -1;
 	   declare isCheckedOutVar int default -1;
-       select isCheckedIn,isCheckedOut into isCheckedInVar,isCheckedOutVar from booking where bookingId = bookingIdInput;
+	   declare bookingHotelIdVar int default -1;
+	   declare staffHotelIdVar int default -1;
+	   select hotelid into staffHotelIdVar from staff where staffid=staffIdInput;
+       select isCheckedIn,isCheckedOut,hotel into isCheckedInVar,isCheckedOutVar,bookingHotelIdVar from booking where bookingId = bookingIdInput;
+       
+		if(bookingHotelIdVar != staffHotelIdVar) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Staff does not belong to this hotel';
+       end if;
+       
        if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
        end if;
@@ -669,11 +683,21 @@ create procedure deleteStaff(
 	delete from staff where staffid=staffIdToDelete;
     end //
 delimiter ;
-call deleteStaff(5,11);
+
 delete from staff where staffid=1;
 call createStaff("Ram","+1767-287-4851","arun@hms.coom","ssn16",0,null,null,1);
 
+call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
+
+call addOccupantToBooking(20,"24SN28","DF",22);
+call checkinBooking(23,1);
+call checkoutBooking(23,1);
+call deleteBooking(17);
+call deleteStaff(1,3);
+
+
 select * from staff; 
+select * from booking;
 select * from booking_log;
 select * from customer;
 select * from hotel;
