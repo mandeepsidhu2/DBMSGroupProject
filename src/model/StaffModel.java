@@ -49,7 +49,6 @@ public class StaffModel {
     String query = "call getStaffById(?)";
     List<Staff> staffDataList;
     try {
-      System.out.println("heree1");
       ResultSet resultSet =  procedureExecutor.preparedStatement(query)
               .setStatementParam(1, staffId.toString())
               .execute();
@@ -67,7 +66,6 @@ public class StaffModel {
                                 String ssn, String startDate, String endDate, Integer hotelId)
           throws SQLException {
     String query = "call createStaff(?,?, ?, ?, ?, ?, ?, ?)";
-    List<Staff> staffDataList;
     try {
       ResultSet resultSet =  procedureExecutor.preparedStatement(query)
               .setStatementParam(1, name.toString())
@@ -101,5 +99,22 @@ public class StaffModel {
       procedureExecutor.cleanup();
       throw e;
     }
+  }
+
+  public List<Staff> getStaffListForHotel(Integer hotelId) throws SQLException {
+    String query = "call getStaffListForHotel(?)";
+    List<Staff> staffDataList;
+    try {
+      ResultSet resultSet =  procedureExecutor.preparedStatement(query)
+              .setStatementParam(1, hotelId.toString())
+              .execute();
+      staffDataList = getFromIteratorStaffList(resultSet);
+      procedureExecutor.cleanup();
+    }
+    catch (Exception e) {
+      procedureExecutor.cleanup();
+      throw e;
+    }
+    return staffDataList;
   }
 }

@@ -668,8 +668,17 @@ public class HotelManagementSystem {
             "\nPress 1 to view bookings." +
             "\nPress 2 to checkin a booking made at the hotel." +
             "\nPress 3 to checkout the guests from the hotel" +
-            "\n Press any other digit to exit.");
-    int choice = inputAnIntFromUser();
+            "\n Press 4 to exit out of this menu." +
+            "\n Press 5 to go back to user-type selection menu.");
+    int choice;
+    try {
+      choice = inputAnIntFromUser();
+    }
+    catch (Exception e) {
+      System.out.println(e.getMessage());
+      startRegularStaffProcess(staffId, hotelId);
+      return;
+    }
     switch (choice) {
       case 1:
         try{
@@ -689,8 +698,14 @@ public class HotelManagementSystem {
         checkOutBookingJourney(staffId, hotelId);
         startRegularStaffProcess(staffId, hotelId);
         return;
-      default:
+      case 4:
         break;
+      case 5:
+        run();
+        return;
+      default:
+        startRegularStaffProcess(staffId, hotelId);
+        return;
     }
   }
 
@@ -700,9 +715,20 @@ public class HotelManagementSystem {
             "\nPress 2 to checkin a booking made at the hotel." +
             "\nPress 3 to checkout the guests from the hotel" +
             "\nPress 4 to add staff members for the hotel working force" +
-            "\n Press 5 to delete non-manager staff members from the hotel working force" +
-            "\n Press any other digit to exit.");
-    int choice = inputAnIntFromUser();
+            "\nPress 5 to delete non-manager staff members from the hotel working force" +
+            "\nPress 6 to see all staff members for your hotel" +
+            "\nPress 7 to go back to user-type selection menu" +
+            "\nPress any other digit to exit.");
+    int choice;
+    try {
+      choice = inputAnIntFromUser();
+    }
+    catch (Exception e) {
+      System.out.println(e.getMessage());
+      startManagerStaffProcess(staffId, hotelId);
+      return;
+    }
+
     switch (choice) {
       case 1:
         try{
@@ -710,28 +736,59 @@ public class HotelManagementSystem {
         }
         catch (Exception e) {
           System.out.println("Unable to connect to the database.");
-          return;
+//          return;
         }
-        startRegularStaffProcess(staffId, hotelId);
+        startManagerStaffProcess(staffId, hotelId);
         return;
       case 2:
         checkInBookingJourney(staffId, hotelId);
-        startRegularStaffProcess(staffId, hotelId);
+        startManagerStaffProcess(staffId, hotelId);
         return;
       case 3:
         checkOutBookingJourney(staffId, hotelId);
-        startRegularStaffProcess(staffId, hotelId);
+        startManagerStaffProcess(staffId, hotelId);
         return;
       case 4:
         addStaffJourney(hotelId);
-        startRegularStaffProcess(staffId, hotelId);
+        startManagerStaffProcess(staffId, hotelId);
         return;
       case 5:
         deleteStaffJourney(staffId);
-        startRegularStaffProcess(staffId, hotelId);
+        startManagerStaffProcess(staffId, hotelId);
         return;
+      case 6:
+        try{
+          getStaffForHotelPrinted(hotelId);
+        }
+        catch (Exception e) {
+          System.out.println("Unable to connect to the database.");
+        }
+        startManagerStaffProcess(staffId, hotelId);
+        return;
+      case 7:
+        run();
+        return;
+
       default:
-        break;
+        startManagerStaffProcess(staffId, hotelId);
+        return;
+    }
+  }
+
+  private void getStaffForHotelPrinted(Integer hotelId) throws SQLException {
+    List<Staff> staffList = new ArrayList<>();
+    staffList = staffModel.getStaffListForHotel(hotelId);
+    System.out.println("Heres a list of available staff members at this hotel:");
+    System.out.println("");
+    System.out.println("Staff-Id" + " | " + "Name" + " | " + "Phone" +
+            " | " + "Email" + " | " + "SSN" + " | " + "Is-Manager" +
+            "Contract Start Date" + " | " + "Contract End Date" + " | " + "Hotel Id"
+    );
+    for(Staff s: staffList) {
+      System.out.println(s.getStaffId() + " | " + s.getName() + " | " + s.getPhone() + " | " +
+              s.getEmail() + " | " + s.getSsn() + " | " + s.getIsManager() +
+              " | " + s.getContractStartDate() + " | " + s.getContractEndDate() + " | " + s.getHotelId()
+      );
     }
   }
 
@@ -766,9 +823,9 @@ public class HotelManagementSystem {
     String email = reader.nextLine();
     System.out.println("Enter staff's SSN no:");
     String ssn = reader.nextLine();
-    System.out.println("Enter staff's start date:");
+    System.out.println("Enter staff's start date in the format yyyy-MM-dd:");
     String startDate = reader.nextLine();
-    System.out.println("Enter staff's end date as per initial contract:");
+    System.out.println("Enter staff's end date as per initial contract in the format yyyy-MM-dd:");
     String endDate = reader.nextLine();
     try {
       staffModel.createStaffMember(name, phone, email, ssn, startDate, endDate, hotelId);
