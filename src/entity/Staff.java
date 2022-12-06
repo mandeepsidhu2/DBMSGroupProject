@@ -17,7 +17,6 @@ public class Staff {
   private String email;
   private String ssn;
   private Integer isManager;
-  private Integer isContractStaff;
   private String contractStartDate;
   private String contractEndDate;
   private Integer hotelId;

@@ -638,21 +638,27 @@ public class HotelManagementSystem {
       staffData = staffModel.getStaffData(staffId);
       System.out.println("HERE");
     } catch (Exception e) {
-      System.out.println("Error extracting data from the data server. Try again!");
+      System.out.println("Error extracting data from the data server. Try again!" + e.getMessage());
       startHotelStaffProcess();
     }
     if (staffData.size() == 0) {
       System.out.println("No such staff exists");
       startHotelStaffProcess();
+      return;
     } else if (staffData.get(0).getHotelId() != hotelId) {
       System.out.println("The entered staff-id does not work at the specified hotel.");
       startHotelStaffProcess();
+      return;
     } else if (staffData.get(0).getHotelId() == hotelId && staffData.get(0).getIsManager() == 1) {
       System.out.println("Taking you to manager's options panel.");
       startManagerStaffProcess(staffId, hotelId);
+      startHotelStaffProcess();
+      return;
     } else {
       System.out.println("Taking you to regular-hotel staff options panel.");
       startRegularStaffProcess(staffId, hotelId);
+      startHotelStaffProcess();
+      return;
     }
 
   }
@@ -718,6 +724,8 @@ public class HotelManagementSystem {
         return;
       case 4:
         addStaffJourney(hotelId);
+        startRegularStaffProcess(staffId, hotelId);
+        return;
       case 5:
         deleteStaffJourney(staffId);
         startRegularStaffProcess(staffId, hotelId);
@@ -729,13 +737,22 @@ public class HotelManagementSystem {
 
   public void deleteStaffJourney(Integer managerId) {
     System.out.println("Enter id of the staff to be deleted.");
-    Integer staffId = inputAnIntFromUser();
+    Integer staffId = 0;
+    try {
+      staffId = inputAnIntFromUser();
+    }
+    catch (Exception e) {
+      System.out.println("Retry!");
+      return;
+    }
     try{
       staffModel.deleteStaffMember(managerId, staffId);
       System.out.println("Staff deleted successfully");
+      return;
     }
     catch (Exception e) {
       System.out.println("Unable to delete staff.");
+      return;
     }
 
   }
@@ -756,9 +773,11 @@ public class HotelManagementSystem {
     try {
       staffModel.createStaffMember(name, phone, email, ssn, startDate, endDate, hotelId);
       System.out.println("Staff creation successful");
+      return;
     }
     catch (Exception e) {
       System.out.println("Creating new staff failed");
+      return;
     }
 
 

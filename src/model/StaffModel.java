@@ -23,8 +23,7 @@ public class StaffModel {
       String phone = resultSetFromProcedure.getString("phone");
       String email = resultSetFromProcedure.getString("email");
       String ssn = resultSetFromProcedure.getString("ssn");
-      Integer isManager = Integer.valueOf(resultSetFromProcedure.getString("isManager"));
-      Integer isContractStaff = Integer.valueOf(resultSetFromProcedure.getString("isContractStaff"));
+      Integer isManager = Integer.valueOf(resultSetFromProcedure.getString("ismanager"));
       String contractStartDate = resultSetFromProcedure.getString("contractStartDate");
       String contractEndDate = resultSetFromProcedure.getString("contractEndDate");
       Integer hotelId = Integer.valueOf(resultSetFromProcedure.getString("hotelId"));
@@ -36,7 +35,6 @@ public class StaffModel {
               .email(email)
               .ssn(ssn)
               .isManager(isManager)
-              .isContractStaff(isContractStaff)
               .contractStartDate(contractStartDate)
               .contractEndDate(contractEndDate)
               .hotelId(hotelId)
@@ -51,6 +49,7 @@ public class StaffModel {
     String query = "call getStaffById(?)";
     List<Staff> staffDataList;
     try {
+      System.out.println("heree1");
       ResultSet resultSet =  procedureExecutor.preparedStatement(query)
               .setStatementParam(1, staffId.toString())
               .execute();
