@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -515,7 +516,7 @@ public class HotelManagementSystem {
       reader.nextLine();
       return action;
     } catch (Exception e) {
-      this.view.printExpectedIntegerMessage();
+      System.out.println("Invalid integer entered!");
       reader.nextLine();
       throw e;
     }
@@ -529,17 +530,23 @@ public class HotelManagementSystem {
       reader.nextLine();
       return action;
     } catch (Exception e) {
-      this.view.printExpectedIntegerMessage();
+      System.out.println("Invalid integer entered!");
       reader.nextLine();
       throw e;
     }
   }
 
   public void loggedInUserJourney() {
-    List<Integer> options = this.view.printLoggedInUserJourneyOptions();
+    List<Integer> options = Arrays.asList(1, 2, 3, 4);
+    System.out.println("\nWhat would you like to do?");
+    System.out.println("(1) View your bookings");
+    System.out.println("(2) View currently available hotels");
+    System.out.println("(3) Get availability by date");
+    System.out.println("(4) Logout");
+    System.out.println("Press 1, 2 , 3 or 4");
     Integer option = inputAnIntFromUser();
     if (!options.contains(option)) {
-      this.view.printInvalidOptionSelected();
+      System.out.println("Invalid option selected!");
       loggedInUserJourney();
       return;
     }
@@ -608,13 +615,13 @@ public class HotelManagementSystem {
    * Connect to MySQL and do some stuff.
    */
   public void run() {
-//    try {
-//      this.occupantModel.getOccupantDetailsForBooking(1);
-//
-//    }catch (Exception e){
-//      System.out.println(e.getMessage());
-//    }
-    List<Integer> ops = view.firstMessageToUser();
+    List<Integer> ops = Arrays.asList(1, 2, 3);
+    System.out.println("Welcome to the portal!");
+    System.out.println("What would you like to do?\n(1) Login as a user");
+    System.out.println("(2) Login as hotel staff");
+    System.out.println("(2) Press 3 to exit");
+    System.out.println("Press 1, 2 or 3");
+
     Integer optionSelected = -1;
     try {
       optionSelected = inputAnIntFromUser();
