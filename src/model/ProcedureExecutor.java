@@ -4,9 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-
-import entity.Staff;
 
 public class ProcedureExecutor {
 
@@ -25,7 +22,7 @@ public class ProcedureExecutor {
     try {
       prepareStatementForProcedure = this.connection.prepareStatement(statement);
     } catch (SQLException sqlException) {
-      System.out.println("Cannot fetch data " + sqlException.getMessage());
+      System.out.println(sqlException.getMessage());
       return null;
     }
     return this;
@@ -36,7 +33,7 @@ public class ProcedureExecutor {
     try {
       prepareStatementForProcedure.setString(idx, s);
     } catch (SQLException sqlException) {
-      System.out.println("Cannot fetch data " + sqlException.getMessage());
+      System.out.println(sqlException.getMessage());
       return null;
     }
     return this;
@@ -48,7 +45,7 @@ public class ProcedureExecutor {
       resultSet = prepareStatementForProcedure.executeQuery();
 
     } catch (SQLException sqlException) {
-      System.out.println("Cannot fetch data " + sqlException.getMessage());
+      System.out.println(sqlException.getMessage());
       throw sqlException;
     }
     this.resultSet = resultSet;

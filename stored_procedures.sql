@@ -238,7 +238,8 @@ create procedure addOccupantToBooking(
 		rollback;
         SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to create occupant, rolling back transaction';
 	end;
-    select capacity into bookedRoomCapacity from booking inner join rooms on  booking.roomNo=rooms.roomno where bookingId=bookingIdInput;
+    select capacity into bookedRoomCapacity from booking inner join rooms on  booking.roomNo=rooms.roomNo where bookingId=bookingIdInput;
+    select count(*)+1 into currentNumberOfOccupants from occupantsinorder where bookingId=bookingIdInput;
     if(bookedRoomCapacity is null) then
 		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid booking id has been entered';
     end if;
@@ -255,7 +256,7 @@ create procedure addOccupantToBooking(
     commit;
     end //
 delimiter ;
-call addOccupantToBooking(4,"SSN22","DF",5);
+call addOccupantToBooking(1,"SSN6","DF",5);
 
 select * from customer;
 select * from booking;
@@ -550,6 +551,10 @@ create procedure checkinBooking(
        select isCheckedIn,isCheckedOut,startDate,hotel into isCheckedInVar,isCheckedOutVar,startDateVar,bookingHotelIdVar from booking where bookingId = bookingIdInput;
        select hotelid into staffHotelIdVar from staff where staffid=staffIdInput;
        
+	  if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+       
 	   if(bookingHotelIdVar != staffHotelIdVar) then
 			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Staff does not belong to this hotel';
        end if;
@@ -557,9 +562,7 @@ create procedure checkinBooking(
        if(datediff(startDateVar,curdate()) !=0) then
 				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking can be checked in only on start date';
        end if;
-       if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
-       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
-       end if;
+  
 	  if( isCheckedInVar =1 or isCheckedOutVar =1) then
        			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking already checked in/out';
        end if;
@@ -690,13 +693,13 @@ call createStaff("Ram","+1767-287-4851","arun@hms.coom","ssn16",0,null,null,1);
 call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
 
 call addOccupantToBooking(20,"24SN28","DF",22);
-call checkinBooking(23,1);
-call checkoutBooking(23,1);
+call checkinBooking(24,1);
+call checkoutBooking(24,1);
 call deleteBooking(17);
 call deleteStaff(1,3);
 
 
-select * from staff; 
+select * from customer; 
 select * from booking;
 select * from booking_log;
 select * from customer;

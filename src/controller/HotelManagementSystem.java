@@ -9,7 +9,6 @@ import entity.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,9 +71,9 @@ public class HotelManagementSystem {
       connectionProps.put("password", this.password);
 
       this.connection = DriverManager.getConnection("jdbc:mysql://"
-                      + this.serverName + ":" + this.portNumber + "/" + this.dbName
-                      + "?characterEncoding=UTF-8&useSSL=false",
-              connectionProps);
+              + this.serverName + ":" + this.portNumber + "/" + this.dbName
+              + "?characterEncoding=UTF-8&useSSL=false",
+          connectionProps);
       System.out.println("Congratulations, you are now connected to database");
       ProcedureExecutor procedureExecutor = new ProcedureExecutor(connection);
       userModel = new UserModel(procedureExecutor);
@@ -405,7 +404,7 @@ public class HotelManagementSystem {
     try {
       this.occupantModel.addOccupantToABooking(bookingId, ssn, name, age);
     } catch (Exception e) {
-      System.out.println("Unable to create a booking due to error " + e.getMessage());
+      System.out.println("Unable to add more occupants");
       manageUserBookings();
       return;
     }
@@ -586,7 +585,7 @@ public class HotelManagementSystem {
     Integer age = inputAnIntFromUser();
 
     User userToCreate = new User().toBuilder().age(age).email(email).phone(phone).name(name)
-            .ssn(ssn).build();
+        .ssn(ssn).build();
     userModel.createUser(userToCreate);
     System.out.println("Signed up... ");
     return this.userModel.getUserBySSN(ssn);
@@ -616,7 +615,7 @@ public class HotelManagementSystem {
 
   public void startHotelStaffProcess() {
     System.out.println("Welcome to hotel-staff portal.\n" +
-            "Here you can handle all the bookings for customers at your hotel.\n");
+        "Here you can handle all the bookings for customers at your hotel.\n");
     int hotelId = 0, staffId = 0;
     System.out.println("Enter the hotel id:");
     try {
@@ -638,7 +637,6 @@ public class HotelManagementSystem {
     List<Staff> staffData = null;
     try {
       staffData = staffModel.getStaffData(staffId);
-      System.out.println("HERE");
     } catch (Exception e) {
       System.out.println("Error extracting data from the data server. Try again!" + e.getMessage());
       startHotelStaffProcess();
@@ -667,28 +665,26 @@ public class HotelManagementSystem {
 
   public void startRegularStaffProcess(Integer staffId, Integer hotelId) {
     System.out.println("Welcome staff id:" + staffId +
-            "\nPress 1 to view bookings." +
-            "\nPress 2 to checkin a booking made at the hotel." +
-            "\nPress 3 to checkout the guests from the hotel" +
-            "\n Press 4 to exit out of this menu." +
-            "\n Press 5 to go back to user-type selection menu.");
+        "\nPress 1 to view bookings." +
+        "\nPress 2 to checkin a booking made at the hotel." +
+        "\nPress 3 to checkout the guests from the hotel" +
+        "\nPress 4 to exit out of this menu." +
+        "\nPress 5 to go back to user-type selection menu.");
     int choice;
     try {
       choice = inputAnIntFromUser();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
       startRegularStaffProcess(staffId, hotelId);
       return;
     }
     switch (choice) {
       case 1:
-        try{
+        try {
           getHotelBookingsPrinted(hotelId);
-        }
-        catch (Exception e) {
-         System.out.println("Unable to connect to the database.");
-         return;
+        } catch (Exception e) {
+          System.out.println("Unable to connect to the database.");
+          return;
         }
         startRegularStaffProcess(staffId, hotelId);
         return;
@@ -713,19 +709,17 @@ public class HotelManagementSystem {
 
   public void startManagerStaffProcess(Integer staffId, Integer hotelId) {
     System.out.println("Welcome staff id:" + staffId +
-            "\nPress 1 to view bookings." +
-            "\nPress 2 to checkin a booking made at the hotel." +
-            "\nPress 3 to checkout the guests from the hotel" +
-            "\nPress 4 to add staff members for the hotel working force" +
-            "\nPress 5 to delete non-manager staff members from the hotel working force" +
-            "\nPress 6 to see all staff members for your hotel" +
-            "\nPress 7 to go back to user-type selection menu" +
-            "\nPress any other digit to exit.");
+        "\nPress 1 to view bookings." +
+        "\nPress 2 to checkin a booking made at the hotel." +
+        "\nPress 3 to checkout the guests from the hotel" +
+        "\nPress 4 to add staff members for the hotel working force" +
+        "\nPress 5 to delete non-manager staff members from the hotel working force" +
+        "\nPress 6 to see all staff members for your hotel" +
+        "\nPress 7 to go back to user-type selection menu");
     int choice;
     try {
       choice = inputAnIntFromUser();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
       startManagerStaffProcess(staffId, hotelId);
       return;
@@ -733,10 +727,9 @@ public class HotelManagementSystem {
 
     switch (choice) {
       case 1:
-        try{
+        try {
           getHotelBookingsPrinted(hotelId);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
           System.out.println("Unable to connect to the database.");
 //          return;
         }
@@ -759,10 +752,9 @@ public class HotelManagementSystem {
         startManagerStaffProcess(staffId, hotelId);
         return;
       case 6:
-        try{
+        try {
           getStaffForHotelPrinted(hotelId);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
           System.out.println("Unable to connect to the database.");
         }
         startManagerStaffProcess(staffId, hotelId);
@@ -781,15 +773,15 @@ public class HotelManagementSystem {
     List<Staff> staffList = new ArrayList<>();
     staffList = staffModel.getStaffListForHotel(hotelId);
     System.out.println("Heres a list of available staff members at this hotel:");
-    System.out.println("");
+    System.out.println();
     System.out.println("Staff-Id" + " | " + "Name" + " | " + "Phone" +
-            " | " + "Email" + " | " + "SSN" + " | " + "Is-Manager" +
-            "Contract Start Date" + " | " + "Contract End Date" + " | " + "Hotel Id"
+        " | " + "Email" + " | " + "SSN" + " | " + "Is-Manager" +
+        "Contract Start Date" + " | " + "Contract End Date" + " | " + "Hotel Id"
     );
-    for(Staff s: staffList) {
+    for (Staff s : staffList) {
       System.out.println(s.getStaffId() + " | " + s.getName() + " | " + s.getPhone() + " | " +
-              s.getEmail() + " | " + s.getSsn() + " | " + s.getIsManager() +
-              " | " + s.getContractStartDate() + " | " + s.getContractEndDate() + " | " + s.getHotelId()
+          s.getEmail() + " | " + s.getSsn() + " | " + s.getIsManager() +
+          " | " + s.getContractStartDate() + " | " + s.getContractEndDate() + " | " + s.getHotelId()
       );
     }
   }
@@ -799,17 +791,15 @@ public class HotelManagementSystem {
     Integer staffId = 0;
     try {
       staffId = inputAnIntFromUser();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println("Retry!");
       return;
     }
-    try{
+    try {
       staffModel.deleteStaffMember(managerId, staffId);
       System.out.println("Staff deleted successfully");
       return;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println("Unable to delete staff.");
       return;
     }
@@ -833,8 +823,7 @@ public class HotelManagementSystem {
       staffModel.createStaffMember(name, phone, email, ssn, startDate, endDate, hotelId);
       System.out.println("Staff creation successful");
       return;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println("Creating new staff failed");
       return;
     }
@@ -853,16 +842,15 @@ public class HotelManagementSystem {
       startRegularStaffProcess(staffId, hotelId);
       return;
     }
-    try{
+    try {
       bookingModel.checkOutBooking(bookingId, staffId);
       System.out.println("Check out Successful");
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
     }
   }
 
-  public void checkInBookingJourney(Integer staffId,Integer hotelId) {
+  public void checkInBookingJourney(Integer staffId, Integer hotelId) {
     Integer bookingId = -1;
     try {
       System.out.println("Enter the booking id of the order to be checked-in:");
@@ -872,11 +860,10 @@ public class HotelManagementSystem {
       startRegularStaffProcess(staffId, hotelId);
       return;
     }
-    try{
+    try {
       bookingModel.checkInBooking(bookingId, staffId);
       System.out.println("Check in Successful");
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
     }
   }
@@ -885,16 +872,19 @@ public class HotelManagementSystem {
     List<Booking> bookingsList = new ArrayList<>();
     bookingsList = bookingModel.getBookingsForHotel(hotelId);
     System.out.println("Heres a list of available bookings for this hotel:");
-    System.out.println("");
+    System.out.println();
     System.out.println("Customer-Id" + " | " + "Booking-Id" + " | " + "Hotel-Id" +
-            " | " + "Check-in Staff Id" + " | " + "Check-out Staff Id" + " | " + "IsChecked-in?" +
-            "IsChecked-out" + " | " + "Start Date" + " | " + "End Date" + " | " + "Rating"
-                    + " | " + "Rating Description" + " | " + "Room No"
-            );
-    for(Booking b: bookingsList) {
-      System.out.println(b.getCustomerId() + " | " + b.getBookingId() + " | " + b.getHotelId() + " | " +
-              b.getCheckedInByStaffId() + " | " + b.getCheckedOutByStaffId() + " | " + b.getIsCheckedIn() +
-              " | " + b.getIsCheckedOut() + " | " + b.getStartDate() + " | " + b.getEndDate() + " | " +
+        " | " + "Check-in Staff Id" + " | " + "Check-out Staff Id" + " | " + "IsChecked-in?" +
+        "IsChecked-out" + " | " + "Start Date" + " | " + "End Date" + " | " + "Rating"
+        + " | " + "Rating Description" + " | " + "Room No"
+    );
+    for (Booking b : bookingsList) {
+      System.out.println(
+          b.getCustomerId() + " | " + b.getBookingId() + " | " + b.getHotelId() + " | " +
+              b.getCheckedInByStaffId() + " | " + b.getCheckedOutByStaffId() + " | "
+              + b.getIsCheckedIn() +
+              " | " + b.getIsCheckedOut() + " | " + b.getStartDate() + " | " + b.getEndDate()
+              + " | " +
               b.getRating() + " | " + b.getRatingDescription() + " | " + b.getRoomNo());
     }
   }
@@ -907,7 +897,7 @@ public class HotelManagementSystem {
     System.out.println("Welcome to the portal!");
     System.out.println("What would you like to do?\n(1) Login as a user");
     System.out.println("(2) Login as hotel staff");
-    System.out.println("(2) Press 3 to exit");
+    System.out.println("(3) Press 3 to exit");
     System.out.println("Press 1, 2 or 3");
 
     Integer optionSelected = -1;
@@ -931,6 +921,7 @@ public class HotelManagementSystem {
         startHotelStaffProcess();
         break;
       case 3:
+        System.exit(0);
         return;
     }
 
