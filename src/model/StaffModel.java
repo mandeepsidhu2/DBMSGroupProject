@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import entity.Occupant;
 import entity.Staff;
 
 public class StaffModel {
@@ -65,4 +64,43 @@ public class StaffModel {
     return staffDataList;
   }
 
+  public void createStaffMember(String name, String phone, String email,
+                                String ssn, String startDate, String endDate, Integer hotelId)
+          throws SQLException {
+    String query = "call createStaff(?,?, ?, ?, ?, ?, ?, ?)";
+    List<Staff> staffDataList;
+    try {
+      ResultSet resultSet =  procedureExecutor.preparedStatement(query)
+              .setStatementParam(1, name.toString())
+              .setStatementParam(2, phone.toString())
+              .setStatementParam(3, email.toString())
+              .setStatementParam(4, ssn.toString())
+              .setStatementParam(5, "0")
+              .setStatementParam(6, startDate.toString())
+              .setStatementParam(7, endDate.toString())
+              .setStatementParam(8, hotelId.toString())
+              .execute();
+      procedureExecutor.cleanup();
+    }
+    catch (Exception e) {
+      procedureExecutor.cleanup();
+      throw e;
+    }
+  }
+
+  public void deleteStaffMember(Integer managerId, Integer staffId) throws SQLException {
+    String query = "call deleteStaff(?, ?)";
+    List<Staff> staffDataList;
+    try {
+      ResultSet resultSet =  procedureExecutor.preparedStatement(query)
+              .setStatementParam(1, managerId.toString())
+              .setStatementParam(2, staffId.toString())
+              .execute();
+      procedureExecutor.cleanup();
+    }
+    catch (Exception e) {
+      procedureExecutor.cleanup();
+      throw e;
+    }
+  }
 }

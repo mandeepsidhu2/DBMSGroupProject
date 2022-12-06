@@ -10,6 +10,7 @@ import entity.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -716,11 +717,53 @@ public class HotelManagementSystem {
         startRegularStaffProcess(staffId, hotelId);
         return;
       case 4:
-//        addStaffJourney(hotelId);
+        addStaffJourney(hotelId);
+      case 5:
+        deleteStaffJourney(staffId);
+        startRegularStaffProcess(staffId, hotelId);
+        return;
       default:
         break;
     }
   }
+
+  public void deleteStaffJourney(Integer managerId) {
+    System.out.println("Enter id of the staff to be deleted.");
+    Integer staffId = inputAnIntFromUser();
+    try{
+      staffModel.deleteStaffMember(managerId, staffId);
+      System.out.println("Staff deleted successfully");
+    }
+    catch (Exception e) {
+      System.out.println("Unable to delete staff.");
+    }
+
+  }
+
+  public void addStaffJourney(Integer hotelId) {
+    System.out.println("Enter new staff name");
+    String name = reader.nextLine();
+    System.out.println("Enter staff's phone no:");
+    String phone = reader.nextLine();
+    System.out.println("Enter staff's email id:");
+    String email = reader.nextLine();
+    System.out.println("Enter staff's SSN no:");
+    String ssn = reader.nextLine();
+    System.out.println("Enter staff's start date:");
+    String startDate = reader.nextLine();
+    System.out.println("Enter staff's end date as per initial contract:");
+    String endDate = reader.nextLine();
+    try {
+      staffModel.createStaffMember(name, phone, email, ssn, startDate, endDate, hotelId);
+      System.out.println("Staff creation successful");
+    }
+    catch (Exception e) {
+      System.out.println("Creating new staff failed");
+    }
+
+
+  }
+
 
   public void checkOutBookingJourney(Integer staffId, Integer hotelId) {
     Integer bookingId = -1;
