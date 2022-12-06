@@ -6,13 +6,13 @@ import entity.HotelWithAmenities;
 import entity.Occupant;
 import entity.Staff;
 import entity.User;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-
 import model.BookingModel;
 import model.HotelModel;
 import model.OccupantModel;
@@ -51,7 +50,6 @@ public class HotelManagementSystem {
    * The name of the database of sharks
    */
   private final String dbName = "final_project";
-  private final View view;
   private final UserModel userModel;
   private final HotelModel hotelModel;
 
@@ -65,7 +63,6 @@ public class HotelManagementSystem {
   private Connection connection = null;
 
   public HotelManagementSystem(String userName, String password) throws Exception {
-    view = new View();
     currentUserContext = null;
 
     this.userName = userName;
@@ -101,8 +98,8 @@ public class HotelManagementSystem {
     String endDate = new SimpleDateFormat("dd-MM-yyyy").format(booking.getEndDate());
 
     System.out.println(booking.getBookingId() + "             " + booking.getHotelId() + "      "
-            + startDate + "    " + endDate + "      " + booking.getName() + ", " + booking.getTown()
-            + ", " + booking.getState());
+        + startDate + "    " + endDate + "      " + booking.getName() + ", " + booking.getTown()
+        + ", " + booking.getState());
   }
 
 
@@ -121,16 +118,16 @@ public class HotelManagementSystem {
       return;
     }
     List<Booking> futureBookings = bookingList.stream()
-            .filter(b -> !b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
-                    Collectors.toList());
+        .filter(b -> !b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
+            Collectors.toList());
     Collections.sort(futureBookings, Comparator.comparingInt(Booking::getBookingId));
 
     List<Booking> checkedInBookings = bookingList.stream()
-            .filter(b -> b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
-                    Collectors.toList());
+        .filter(b -> b.getIsCheckedIn() && !b.getIsCheckedOut()).collect(
+            Collectors.toList());
     List<Booking> pastBookings = bookingList.stream()
-            .filter(b -> b.getIsCheckedIn() && b.getIsCheckedOut()).collect(
-                    Collectors.toList());
+        .filter(b -> b.getIsCheckedIn() && b.getIsCheckedOut()).collect(
+            Collectors.toList());
 
     if (pastBookings.size() > 0) {
       System.out.println("Past bookings:");
@@ -158,14 +155,14 @@ public class HotelManagementSystem {
 
     if (futureBookings.size() > 0 || pastBookings.size() > 0) {
       System.out.println(
-              "Enter a booking id you would like to modify, any other key to exit");
+          "Enter a booking id you would like to modify, any other key to exit");
       Integer bookingId;
       try {
         bookingId = inputAnIntFromUser();
         if (futureBookings.stream().filter(booking -> booking.getBookingId()
-                .equals(bookingId)).collect(Collectors.toList()).size() == 0 &&
-                pastBookings.stream().filter(booking -> booking.getBookingId()
-                        .equals(bookingId)).collect(Collectors.toList()).size() == 0
+            .equals(bookingId)).collect(Collectors.toList()).size() == 0 &&
+            pastBookings.stream().filter(booking -> booking.getBookingId()
+                .equals(bookingId)).collect(Collectors.toList()).size() == 0
         ) {
           throw new IllegalArgumentException("Invalid booking id entered");
         }
@@ -175,14 +172,14 @@ public class HotelManagementSystem {
         return;
       }
       if (futureBookings.stream().filter(booking -> booking.getBookingId()
-              .equals(bookingId)).collect(Collectors.toList()).size() != 0) {
+          .equals(bookingId)).collect(Collectors.toList()).size() != 0) {
         Booking bookingToModify = futureBookings.stream().filter(booking -> booking.getBookingId()
-                .equals(bookingId)).collect(Collectors.toList()).get(0);
+            .equals(bookingId)).collect(Collectors.toList()).get(0);
         modifyFutureBooking(bookingToModify);
       } else if (pastBookings.stream().filter(booking -> booking.getBookingId()
-              .equals(bookingId)).collect(Collectors.toList()).size() != 0) {
+          .equals(bookingId)).collect(Collectors.toList()).size() != 0) {
         Booking bookingToModify = pastBookings.stream().filter(booking -> booking.getBookingId()
-                .equals(bookingId)).collect(Collectors.toList()).get(0);
+            .equals(bookingId)).collect(Collectors.toList()).get(0);
         modifyPastBooking(bookingToModify);
       }
       return;
@@ -223,7 +220,7 @@ public class HotelManagementSystem {
     }
 
     System.out.println(
-            "Enter the new end date(in yyyy-MM-dd format)...");
+        "Enter the new end date(in yyyy-MM-dd format)...");
     String endDateString = reader.nextLine();
     Date endDate = null;
     try {
@@ -245,11 +242,11 @@ public class HotelManagementSystem {
     System.out.println("\n");
     System.out.println("Details for booking id -> " + booking.getBookingId());
     System.out.println(
-            "Booking start date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
-                    booking.getStartDate()));
+        "Booking start date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getStartDate()));
     System.out.println(
-            "Booking end date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
-                    booking.getEndDate()));
+        "Booking end date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getEndDate()));
     System.out.println("What rating would you like to give for your stay");
     Float rating = inputAnFloatFromUser();
     try {
@@ -266,11 +263,11 @@ public class HotelManagementSystem {
     System.out.println("\n");
     System.out.println("Details for booking id -> " + booking.getBookingId());
     System.out.println(
-            "Booking start date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
-                    booking.getStartDate()));
+        "Booking start date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getStartDate()));
     System.out.println(
-            "Booking end date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
-                    booking.getEndDate()));
+        "Booking end date (dd-MM-yyyy)-> " + new SimpleDateFormat("dd-MM-yyyy").format(
+            booking.getEndDate()));
 
     List<Occupant> occupantList;
     try {
@@ -280,8 +277,8 @@ public class HotelManagementSystem {
         System.out.println("Occupant Name | Occupant SSN | Occupant Age");
         for (Occupant occupant : occupantList) {
           System.out.println(
-                  occupant.getName() + "               " + occupant.getSsn() + "               "
-                          + occupant.getAge());
+              occupant.getName() + "               " + occupant.getSsn() + "               "
+                  + occupant.getAge());
         }
       } else {
         System.out.println("Occupants have currently not been added");
@@ -331,11 +328,11 @@ public class HotelManagementSystem {
   }
 
   private void getHotelAvailabilityForAHotelForInputDates(HotelWithAmenities hotel, Date startDate,
-                                                          Date endDate) {
+      Date endDate) {
     List<HotelAvailability> hotelAvailabilities;
     try {
       hotelAvailabilities = this.hotelModel.
-              getCategoryWiseHotelAvailabilitiesMapForDate(hotel, startDate, endDate);
+          getCategoryWiseHotelAvailabilitiesMapForDate(hotel, startDate, endDate);
     } catch (Exception e) {
       displayHotelDetailPage(hotel);
       return;
@@ -352,12 +349,12 @@ public class HotelManagementSystem {
 
     for (HotelAvailability hotelAvailability : hotelAvailabilities) {
       System.out.println(
-              "(" + (idx + 1) + ") | " + hotelAvailability.getRoomCategory() + "     |     "
-                      + hotelAvailability.getAvailableRooms());
+          "(" + (idx + 1) + ") | " + hotelAvailability.getRoomCategory() + "     |     "
+              + hotelAvailability.getAvailableRooms());
       idx++;
     }
     System.out.println("Select the room type you would like to book between 1 and " + idx + ""
-            + "\nPress any other key to go back to hotel list");
+        + "\nPress any other key to go back to hotel list");
     Integer optionSelected = -1;
     try {
       optionSelected = inputAnIntFromUser();
@@ -375,9 +372,9 @@ public class HotelManagementSystem {
     Integer bookingId = null;
     try {
       bookingId = this.bookingModel.bookARoom(this.currentUserContext.getCustomerId(), startDate,
-              endDate,
-              hotel.getId(),
-              hotelAvailabilities.get(idxOfHotelAvailabilityInArray).getRoomCategory()
+          endDate,
+          hotel.getId(),
+          hotelAvailabilities.get(idxOfHotelAvailabilityInArray).getRoomCategory()
       );
     } catch (Exception e) {
       System.out.println("Unable to book a room due to error-> " + e.getMessage());
@@ -429,7 +426,7 @@ public class HotelManagementSystem {
     System.out.println(hotel.getStreet() + ", " + hotel.getTown() + ", " + hotel.getState());
 
     System.out.println(
-            "Enter the start date for the booking you want to create(in YYYY-MM-DD format)...");
+        "Enter the start date for the booking you want to create(in YYYY-MM-DD format)...");
     String startDateString = reader.nextLine();
     Date startDate = null;
     try {
@@ -441,7 +438,7 @@ public class HotelManagementSystem {
     }
 
     System.out.println(
-            "Enter the end date for the booking you want to create(in YYYY-MM-DD format)...");
+        "Enter the end date for the booking you want to create(in YYYY-MM-DD format)...");
     String endDateString = reader.nextLine();
     Date endDate = null;
     try {
@@ -471,7 +468,7 @@ public class HotelManagementSystem {
     List<HotelWithAmenities> hotelWithAmenities = null;
     try {
       hotelWithAmenities = hotelModel.getAllAvailableHotelsWithAmenities(
-              dateToQuery);
+          dateToQuery);
     } catch (Exception e) {
       viewUserHotelOptions(getAvailabilityToday);
       System.out.println("Unable to load hotel details");
@@ -483,22 +480,22 @@ public class HotelManagementSystem {
     for (HotelWithAmenities hotel : hotelWithAmenities) {
       String rating = hotel.getAvgRating() == 0 ? "N.A." : hotel.getAvgRating().toString();
       System.out.println(
-              hotel.getId() + " | " + hotel.getName() + " | " + rating + " | " + hotel.getEmail()
-                      + " | "
-                      + hotel.getPhone() + " |  " + hotel.getTotalAvailableRooms() + " | "
-                      + hotel.getState()
-                      + "  | "
-                      + hotel.getTown() + " | " + hotel.getStreet() + " | " + hotel.getAmenities() + " | "
-                      + hotel.getAmenitiesDescription());
+          hotel.getId() + " | " + hotel.getName() + " | " + rating + " | " + hotel.getEmail()
+              + " | "
+              + hotel.getPhone() + " |  " + hotel.getTotalAvailableRooms() + " | "
+              + hotel.getState()
+              + "  | "
+              + hotel.getTown() + " | " + hotel.getStreet() + " | " + hotel.getAmenities() + " | "
+              + hotel.getAmenitiesDescription());
     }
     System.out.println("Enter a hotel id to view further details or press any other key to exit");
     Integer optionSelected;
     try {
       optionSelected = inputAnIntFromUser();
       if (hotelWithAmenities.stream()
-              .filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected))
-              .collect(
-                      Collectors.toList()).size() == 0) {
+          .filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected))
+          .collect(
+              Collectors.toList()).size() == 0) {
         throw new IllegalArgumentException("Invalid hotel id selected");
       }
     } catch (IllegalArgumentException e) {
@@ -511,8 +508,8 @@ public class HotelManagementSystem {
       return;
     }
     displayHotelDetailPage(hotelWithAmenities.stream()
-            .filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected)).collect(
-                    Collectors.toList()).get(0));
+        .filter(hotelWithAmenities1 -> hotelWithAmenities1.getId().equals(optionSelected)).collect(
+            Collectors.toList()).get(0));
   }
 
   private Integer inputAnIntFromUser() {
@@ -523,7 +520,7 @@ public class HotelManagementSystem {
       reader.nextLine();
       return action;
     } catch (Exception e) {
-      this.view.printExpectedIntegerMessage();
+      System.out.println("Invalid integer entered!");
       reader.nextLine();
       throw e;
     }
@@ -537,17 +534,23 @@ public class HotelManagementSystem {
       reader.nextLine();
       return action;
     } catch (Exception e) {
-      this.view.printExpectedIntegerMessage();
+      System.out.println("Invalid integer entered!");
       reader.nextLine();
       throw e;
     }
   }
 
   public void loggedInUserJourney() {
-    List<Integer> options = this.view.printLoggedInUserJourneyOptions();
+    List<Integer> options = Arrays.asList(1, 2, 3, 4);
+    System.out.println("\nWhat would you like to do?");
+    System.out.println("(1) View your bookings");
+    System.out.println("(2) View currently available hotels");
+    System.out.println("(3) Get availability by date");
+    System.out.println("(4) Logout");
+    System.out.println("Press 1, 2 , 3 or 4");
     Integer option = inputAnIntFromUser();
     if (!options.contains(option)) {
-      this.view.printInvalidOptionSelected();
+      System.out.println("Invalid option selected!");
       loggedInUserJourney();
       return;
     }
@@ -901,13 +904,13 @@ public class HotelManagementSystem {
    * Connect to MySQL and do some stuff.
    */
   public void run() {
-//    try {
-//      this.occupantModel.getOccupantDetailsForBooking(1);
-//
-//    }catch (Exception e){
-//      System.out.println(e.getMessage());
-//    }
-    List<Integer> ops = view.firstMessageToUser();
+    List<Integer> ops = Arrays.asList(1, 2, 3);
+    System.out.println("Welcome to the portal!");
+    System.out.println("What would you like to do?\n(1) Login as a user");
+    System.out.println("(2) Login as hotel staff");
+    System.out.println("(2) Press 3 to exit");
+    System.out.println("Press 1, 2 or 3");
+
     Integer optionSelected = -1;
     try {
       optionSelected = inputAnIntFromUser();
