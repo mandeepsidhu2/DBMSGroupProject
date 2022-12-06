@@ -22,7 +22,6 @@ import model.HotelModel;
 import model.OccupantModel;
 import model.ProcedureExecutor;
 import model.UserModel;
-import view.View;
 
 public class HotelManagementSystem {
 
@@ -46,7 +45,6 @@ public class HotelManagementSystem {
    * The name of the database of sharks
    */
   private final String dbName = "final_project";
-  private final View view;
   private final UserModel userModel;
   private final HotelModel hotelModel;
 
@@ -59,7 +57,6 @@ public class HotelManagementSystem {
   private Connection connection = null;
 
   public HotelManagementSystem(String userName, String password) throws Exception {
-    view = new View();
     currentUserContext = null;
 
     this.userName = userName;
