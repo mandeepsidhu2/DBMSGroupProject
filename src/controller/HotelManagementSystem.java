@@ -26,7 +26,6 @@ import model.OccupantModel;
 import model.ProcedureExecutor;
 import model.StaffModel;
 import model.UserModel;
-import view.View;
 
 public class HotelManagementSystem {
 
@@ -623,7 +622,7 @@ public class HotelManagementSystem {
     try {
       hotelId = inputAnIntFromUser();
     } catch (Exception e) {
-      view.printExpectedIntegerMessage();
+      System.out.println("Entry not a digit");
       startHotelStaffProcess();
       return;
     }
@@ -631,7 +630,7 @@ public class HotelManagementSystem {
     try {
       staffId = inputAnIntFromUser();
     } catch (Exception e) {
-      view.printExpectedIntegerMessage();
+      System.out.println("Entry not a digit");
       startHotelStaffProcess();
       return;
     }
@@ -850,7 +849,7 @@ public class HotelManagementSystem {
       System.out.println("Enter the booking id of the order to be checked-out:");
       bookingId = inputAnIntFromUser();
     } catch (Exception e) {
-      view.printExpectedIntegerMessage();
+      System.out.println("Entry not a digit");
       startRegularStaffProcess(staffId, hotelId);
       return;
     }
@@ -869,7 +868,7 @@ public class HotelManagementSystem {
       System.out.println("Enter the booking id of the order to be checked-in:");
       bookingId = inputAnIntFromUser();
     } catch (Exception e) {
-      view.printExpectedIntegerMessage();
+      System.out.println("Invalid Integer entered");
       startRegularStaffProcess(staffId, hotelId);
       return;
     }
