@@ -43,6 +43,10 @@ insert into amenitiesathotel (hotelid,amenityId) values (1,4);
 insert into amenitiesathotel (hotelid,amenityId) values (2,1);
 insert into amenitiesathotel (hotelid,amenityId) values (2,3);
 
+INSERT INTO `staff` VALUES (1,'Mandeep','+1767-287-4851','arun@hms.coom','ssn1',1,NULL,NULL,1)
+,(2,'Ujwal','+1767-287-4851','arun@hms.coom','ssn2',0,NULL,NULL,2),
+(3,'Ram','+1767-287-4851','arun@hms.coom','ssn3',0,NULL,NULL,1);
+
 drop table amenitiesathotel;
 
 select * from hotel;
@@ -184,7 +188,7 @@ in roomNoInput int
 			end if;
         else -- choise first available room, if a specific room was not requested by the function call
 			select roomNo into availableRoomNo from rooms where rooms.hotelid=hotelIdInput and rooms.category=roomCategory and not exists(
-            select * from booking where roomNo=rooms.roomNo and (endDate between
+            select * from booking where roomNo=rooms.roomNo and  isCheckedOut=0 and (endDate between
 			startDateInput and endDateInput or startDate between startDateInput and endDateInput)
             ) limit 1;
             
@@ -243,7 +247,6 @@ create procedure addOccupantToBooking(
 	end if;
     
     start transaction;
-    -- todo check if occupant already exists
 		select ssn into occupantSSNExists from occupant where ssn=ssnI;
         if(occupantSSNExists is null) then
         		insert into occupant (ssn,name,age) values (ssnI,nameI,ageI);
@@ -252,10 +255,10 @@ create procedure addOccupantToBooking(
     commit;
     end //
 delimiter ;
-call addOccupantToBooking(1,"SS2K","DF",5);
+call addOccupantToBooking(4,"SSN22","DF",5);
 
 select * from customer;
-truncate table booking;
+select * from booking;
 select * from occupant;
 select * from occupantsinorder;
 
@@ -270,51 +273,71 @@ create procedure getOccupantDetailsForBooking(in bookingIdIn int)
 delimiter ;
 call getOccupantDetailsForBooking(4);
 
-
 drop procedure if exists deleteBooking;
 delimiter //
 create procedure deleteBooking(in bookingIdIn int)
 	begin
-		declare isCheckedInVar int default 0;
-	   declare isCheckedOurVar int default 0;
-       declare bookingIdVar int default -1;
-		
-       select bookingId,isCheckedIn,isCheckedOut into bookingIdVar,isCheckedInVar, isCheckedOurVar from
-       booking where bookingId=bookingIdIn;
-       if(bookingIdVar = -1) then
-			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
-       end if;
-       if(isCheckedInVar or isCheckedOurVar) then
-       SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
-       end if;
-		delete from booking where bookingId=bookingIdIn;
+	declare isCheckedInVar int default 0;
+	declare isCheckedOurVar int default 0;
+	declare bookingIdVar int default -1;
+	declare occupantSSNVar varchar(45) default null;
+	declare row_not_found tinyint default false;
+    declare occupantIterator cursor for select ssn from occupant ;
+	declare continue handler for not found set row_not_found = true;
+	declare exit handler for SQLEXCEPTION  
+ 	 begin
+		rollback;
+          SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete booking, rolling back transaction';
+  	end;
+	start transaction;
+		open occupantIterator;
+			 while row_not_found = false do
+				fetch occupantIterator into occupantSSNVar;
+				if occupantSSNVar is not null then
+					call deleteOccupantFromBooking(occupantSSNVar,bookingIdIn);
+				end if;
+			 end while;
+		close occupantIterator;
+	
+		select bookingId,isCheckedIn,isCheckedOut into bookingIdVar,isCheckedInVar, isCheckedOurVar from
+		   booking where bookingId=bookingIdIn;
+		   if(bookingIdVar = -1) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+		   end if;
+		   if(isCheckedInVar or isCheckedOurVar) then
+		   SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking is checked in/out, cannot modify';
+		   end if;
+		 delete from booking where bookingId=bookingIdIn;
+	commit;
     end //
 delimiter ;
-select * from booking;
+
+
+select * from booking_log;
+select * from hotel;
+select * from customer;
+select * from occupantsinorder;
+
+
 
 drop procedure if exists deleteOccupantFromBooking;
 delimiter //
 create procedure deleteOccupantFromBooking(in ssnI varchar(45),in bookingIdI int)
 	begin
-	declare occupantBookingCount int default 0;
 	declare exit handler for SQLEXCEPTION  
 	begin
 		rollback;
         SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Unable to delete occupant from booking';
 	end;
     start transaction;
-		select count(*) into  occupantBookingCount from occupantsinorder where occuppantSSN=ssnI;
 		delete from occupantsinorder where occuppantSSN=ssnI;
-        if(occupantBookingCount = 0) then
-			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Occupant not found';
-        end if;
-        if (occupantBookingCount = 1) then
-        		delete from occupant where ssn=ssnI;
-        end if;
+	    delete from occupant where ssn=ssnI;
 	commit;
     end //
 delimiter ;
-call deleteOccupantFromBooking("SSHK",1);
+call deleteOccupantFromBooking("SSN55",8);
+select * from occupantsinorder;
+select * from customer;
 
 use final_project;
 drop procedure if  exists updateBooking;
@@ -389,6 +412,9 @@ delimiter ;
 
 call addRatingForBooking(11,4.5);
 
+
+
+
 drop trigger if exists updateHotelAverageRating;
 delimiter //
 	create trigger	updateHotelAverageRating
@@ -417,20 +443,10 @@ delimiter //
         ("BOOKING_CREATED",new.bookingId,new.customer,new.hotel,concat("roomNo:",new.roomNo));
     end//
 delimiter ;
--- call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
+ call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
 
 
-drop trigger if exists bookingUpdatedTrigger;
-delimiter //
-	create trigger	bookingUpdatedTrigger
-    after update on booking
-    for each row
-	begin
-        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
-        ("BOOKING_UPDATED",new.bookingId,new.customer,new.hotel,
-        concat("{'roomNo':",new.roomNo,",","'startDate':",new.startDate,",","'endDate':",new.endDate,"}"));
-    end//
-delimiter ;
+
 -- call updateBooking(curdate()+ INTERVAL 8 day,curdate()+ INTERVAL 9 DAY,1);
 
 drop trigger if exists occupantCreatedTrigger;
@@ -477,8 +493,211 @@ delimiter //
 delimiter ;
 -- call deleteOccupantFromBooking("S221K",1);
 
-set foreign_key_checks=0;
+drop trigger if exists bookingUpdatedTrigger;
+delimiter //
+	create trigger	bookingUpdatedTrigger
+    after update on booking
+    for each row
+	begin
+		if datediff(new.startDate,old.startDate)!=0 or datediff(new.endDate,old.endDate)!=0 then
+			insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+			("BOOKING_UPDATED",new.bookingId,new.customer,new.hotel,
+			concat("{'roomNo':",new.roomNo,",","'startDate':",new.startDate,",","'endDate':",new.endDate,"}"));
+        end if;
+    end//
+delimiter ;
+
+drop trigger if exists bookingCheckedInTrigger;
+delimiter //
+	create trigger	bookingCheckedInTrigger
+    after update on booking
+    for each row
+	begin
+    if(new.isCheckedIn = 1 and old.isCheckedIn = 0) then
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("CHECKED_IN",new.bookingId,new.customer,new.hotel,concat("{roomNo:",new.roomNo,",checkedInByStaffId:",new.checkedInByStaffId,"}"));
+	end if;
+    end//
+delimiter ;
+
+
+drop trigger if exists bookingCheckedOutTrigger;
+delimiter //
+	create trigger	bookingCheckedOutTrigger
+    after update on booking
+    for each row
+	begin
+    if(new.isCheckedOut = 1 and old.isCheckedOut = 0) then
+        insert into booking_log (`action`,bookingId,customerId,hotelId,metaData) values
+        ("CHECKED_OUT",new.bookingId,new.customer,new.hotel,concat("{roomNo:",new.roomNo,",checkedOutByStaffId:",new.checkedOutByStaffId,"}"));
+	end if;
+    end//
+delimiter ;
+
+
+drop procedure if exists checkinBooking;
+delimiter //
+create procedure checkinBooking(
+	in bookingIdInput int,
+    in staffIdInput int)
+	begin
+	   declare isCheckedInVar int default -1;
+	   declare startDateVar date default null;
+	   declare isCheckedOutVar int default -1;
+	   declare bookingHotelIdVar int default -1;
+	   declare staffHotelIdVar int default -1;
+
+       select isCheckedIn,isCheckedOut,startDate,hotel into isCheckedInVar,isCheckedOutVar,startDateVar,bookingHotelIdVar from booking where bookingId = bookingIdInput;
+       select hotelid into staffHotelIdVar from staff where staffid=staffIdInput;
+       
+	   if(bookingHotelIdVar != staffHotelIdVar) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Staff does not belong to this hotel';
+       end if;
+       
+       if(datediff(startDateVar,curdate()) !=0) then
+				SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking can be checked in only on start date';
+       end if;
+       if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+	  if( isCheckedInVar =1 or isCheckedOutVar =1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking already checked in/out';
+       end if;
+       update booking set isCheckedIn=1 ,checkedInByStaffId=staffIdInput where bookingId=bookingIdInput;
+    end //
+delimiter ;
+call checkinBooking(1,1);
 select * from booking;
+
+drop procedure if exists checkoutBooking;
+delimiter //
+create procedure checkoutBooking(
+	in bookingIdInput int,
+       in staffIdInput int)
+	begin
+	   declare isCheckedInVar int default -1;
+	   declare isCheckedOutVar int default -1;
+	   declare bookingHotelIdVar int default -1;
+	   declare staffHotelIdVar int default -1;
+	   select hotelid into staffHotelIdVar from staff where staffid=staffIdInput;
+       select isCheckedIn,isCheckedOut,hotel into isCheckedInVar,isCheckedOutVar,bookingHotelIdVar from booking where bookingId = bookingIdInput;
+       
+		if(bookingHotelIdVar != staffHotelIdVar) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Staff does not belong to this hotel';
+       end if;
+       
+       if( isCheckedInVar =-1 or isCheckedOutVar =-1) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Booking not found';
+       end if;
+	  if( isCheckedInVar !=1 ) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is not checked in';
+       end if;
+       
+		if( isCheckedOutVar =1 ) then
+       			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid action, booking is already checked out';
+       end if;
+		update booking set isCheckedOut=1,checkedOutByStaffId=staffIdInput,endDate=curdate() where bookingId=bookingIdInput;
+     
+    end //
+delimiter ;
+call checkoutBooking(1,2);
+
+select * from booking;
+
+drop procedure if exists createStaff;
+delimiter //
+create procedure createStaff(
+	in nameInput varchar(45),
+    in phoneInput varchar(45),
+    in emailInput varchar(45),
+	in ssnInput varchar(45),
+	in ismanagerInput tinyint,
+    in contractStartDateInput date,
+	in contractEndDateInput date,
+	in hotelidInput int
+    )
+	begin
+    insert into staff (name,phone,email,ssn,ismanager,contractstartdate,contractenddate,hotelid)
+    values
+    (nameInput,phoneInput,emailInput,ssnInput,ismanagerInput,contractStartDateInput,contractEndDateInput,hotelidInput);
+    end //
+delimiter ;
+call createStaff("Arun","+1767-287-4851","arun@hms.coom","ssn13",0,null,null,1);
+call createStaff("Ujwal","+1767-287-4851","arun@hms.coom","ssn14",1,null,null,1);
+call createStaff("Mandeep","+1767-287-4851","arun@hms.coom","ssn15",1,null,null,1);
+select * from staff;
+
+drop procedure if exists getBookingsForHotel;
+delimiter //
+create procedure getBookingsForHotel(
+    in hotelId_in int
+    )
+    begin
+        select * from booking where hotel = hotelId_in;
+    end //
+delimiter ;
+
+drop procedure if exists getStaffById;
+delimiter //
+create procedure getStaffById(
+    in staffId_in int
+    )
+    begin
+        select * from staff where staffid = staffId_in;
+    end //
+delimiter ;
+
+drop procedure if exists getStaffListForHotel;
+delimiter //
+create procedure getStaffListForHotel(
+    in hotelIdInput int
+    )
+    begin
+        select * from staff where hotelid = hotelIdInput;
+    end //
+delimiter ;
+call getStaffListForHotel(2);
+
+
+
+drop procedure if exists deleteStaff;
+delimiter //
+create procedure deleteStaff(
+	in managerIdInput int,
+    in staffIdToDelete int
+    )
+	begin
+	  declare managerHotelId int default -1;
+	  declare staffHotelId int default -1;
+	  select hotelid into managerHotelId from staff where staffid = managerIdInput;
+	  select hotelid into staffHotelId from staff where staffid = staffIdToDelete;
+      if(managerHotelId = -1) then
+			SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid manager hotel id';
+      end if;
+	 if(staffHotelId = -1) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Invalid staff hotel id';
+      end if;
+	if(managerHotelId != staffHotelId ) then
+		SIGNAL SQLSTATE 'ERR0R' SET MESSAGE_TEXT = 'Mismatch between staff and manager hotel id';
+      end if;
+	delete from staff where staffid=staffIdToDelete;
+    end //
+delimiter ;
+
+delete from staff where staffid=1;
+call createStaff("Ram","+1767-287-4851","arun@hms.coom","ssn16",0,null,null,1);
+
+call createBooking(1,1,curdate(),curdate()+ INTERVAL 1 DAY,"Deluxe",null);
+
+call addOccupantToBooking(20,"24SN28","DF",22);
+call checkinBooking(23,1);
+call checkoutBooking(23,1);
+call deleteBooking(17);
+call deleteStaff(1,3);
+
+
+select * from staff; 
+select * from booking;
+select * from booking_log;
 select * from customer;
-select * from booking_log; 
-select * from occupant;
+select * from hotel;
