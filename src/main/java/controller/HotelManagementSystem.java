@@ -386,9 +386,9 @@ public class HotelManagementSystem {
     String userInput = reader.nextLine();
     if (userInput.equals("y")) {
       addOccupantsToBooking(bookingId);
-    } else {
-      manageUserBookings();
     }
+    manageUserBookings();
+
   }
 
   void addOccupantsToBooking(Integer bookingId) {
