@@ -165,7 +165,6 @@ public class HotelManagementSystem {
           throw new IllegalArgumentException("Invalid booking id entered");
         }
       } catch (Exception e) {
-        System.out.println("Invalid input");
         loggedInUserJourney();
         return;
       }
@@ -412,7 +411,7 @@ public class HotelManagementSystem {
 
     System.out.println("To continue occupants to the booking, press y, any other key to add later");
     System.out.println("[Occupants can be added in manage bookings section]");
-    String userInput = reader.nextLine();
+    String userInput = reader.next();
     if (userInput.equals("y")) {
       addOccupantsToBooking(bookingId);
       return;
