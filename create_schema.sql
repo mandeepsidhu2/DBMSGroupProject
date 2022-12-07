@@ -1,4 +1,3 @@
-drop database if exists `final_project`;
 CREATE DATABASE  IF NOT EXISTS `final_project` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `final_project`;
 -- MySQL dump 10.13  Distrib 8.0.30, for macos12 (x86_64)
@@ -57,8 +56,8 @@ CREATE TABLE `amenitiesathotel` (
                                     `amenityId` int NOT NULL,
                                     PRIMARY KEY (`hotelid`,`amenityId`),
                                     KEY `amenity_fk_idx` (`amenityId`),
-                                    CONSTRAINT `a_hotel_fk` FOREIGN KEY (`hotelid`) REFERENCES `hotel` (`id`),
-                                    CONSTRAINT `amenity_fk` FOREIGN KEY (`amenityId`) REFERENCES `amenities` (`id`)
+                                    CONSTRAINT `a_hotel_fk` FOREIGN KEY (`hotelid`) REFERENCES `hotel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                                    CONSTRAINT `amenity_fk` FOREIGN KEY (`amenityId`) REFERENCES `amenities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -90,7 +89,7 @@ CREATE TABLE `booking` (
                            `endDate` datetime NOT NULL,
                            `rating` float DEFAULT NULL,
                            `ratingDescription` varchar(45) DEFAULT NULL,
-                           `roomNo` int NOT NULL,
+                           `roomNo` int DEFAULT NULL,
                            `checkedOutByStaffId` int DEFAULT NULL,
                            PRIMARY KEY (`bookingId`,`isCheckedIn`),
                            KEY `customer_fk_idx` (`customer`),
@@ -98,12 +97,12 @@ CREATE TABLE `booking` (
                            KEY `staff_fk_idx` (`checkedInByStaffId`),
                            KEY `room_fk_idx` (`roomNo`),
                            KEY `staff_checkout_fk_idx` (`checkedOutByStaffId`),
-                           CONSTRAINT `booking_hotel_fk` FOREIGN KEY (`hotel`) REFERENCES `hotel` (`id`),
-                           CONSTRAINT `customer_fk` FOREIGN KEY (`customer`) REFERENCES `customer` (`customer_id`),
-                           CONSTRAINT `room_fk` FOREIGN KEY (`roomNo`) REFERENCES `rooms` (`roomNo`),
+                           CONSTRAINT `booking_hotel_fk` FOREIGN KEY (`hotel`) REFERENCES `hotel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                           CONSTRAINT `customer_fk` FOREIGN KEY (`customer`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                           CONSTRAINT `room_fk` FOREIGN KEY (`roomNo`) REFERENCES `rooms` (`roomNo`) ON DELETE SET NULL ON UPDATE SET NULL,
                            CONSTRAINT `staff_checkin_fk` FOREIGN KEY (`checkedInByStaffId`) REFERENCES `staff` (`staffid`) ON DELETE SET NULL ON UPDATE SET NULL,
                            CONSTRAINT `staff_checkout_fk` FOREIGN KEY (`checkedOutByStaffId`) REFERENCES `staff` (`staffid`) ON DELETE SET NULL ON UPDATE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +111,7 @@ CREATE TABLE `booking` (
 
 LOCK TABLES `booking` WRITE;
 /*!40000 ALTER TABLE `booking` DISABLE KEYS */;
-INSERT INTO `booking` VALUES (8,6,1,1,1,1,'2022-12-06 00:00:00','2022-12-06 00:00:00',NULL,NULL,1,4),(8,7,1,NULL,0,0,'2022-12-08 00:00:00','2022-12-10 00:00:00',NULL,NULL,1,NULL),(8,8,1,1,1,0,'2022-12-06 00:00:00','2022-12-09 00:00:00',NULL,NULL,2,NULL);
+INSERT INTO `booking` VALUES (8,6,1,1,1,1,'2022-12-06 00:00:00','2022-12-06 00:00:00',5,NULL,1,4),(8,7,1,NULL,0,0,'2022-12-08 00:00:00','2022-12-10 00:00:00',NULL,NULL,1,NULL),(8,8,1,1,1,0,'2022-12-06 00:00:00','2022-12-09 00:00:00',NULL,NULL,2,NULL),(8,9,1,1,1,1,'2022-12-06 00:00:00','2022-12-06 00:00:00',1,NULL,5,1);
 /*!40000 ALTER TABLE `booking` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -242,7 +241,7 @@ CREATE TABLE `booking_log` (
 
 LOCK TABLES `booking_log` WRITE;
 /*!40000 ALTER TABLE `booking_log` DISABLE KEYS */;
-INSERT INTO `booking_log` VALUES ('BOOKING_CREATED',7,8,'roomNo:1',1),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':Tarunb,\'occupantName\':s,\'occupantAge\':12}',7),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':SSN15,\'occupantName\':Tarub,\'occupantAge\':117}',7),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':Tarunb,\'occupantName\':s,\'occupantAge\':12}',7),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':SSN15,\'occupantName\':Tarub,\'occupantAge\':117}',7),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':SSN17,\'occupantName\':Tarub,\'occupantAge\':13}',7),('BOOKING_CREATED',8,8,'roomNo:2',1),('CHECKED_IN',8,8,'{roomNo:2,checkedInByStaffId:1}',1);
+INSERT INTO `booking_log` VALUES ('BOOKING_CREATED',7,8,'roomNo:1',1),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':Tarunb,\'occupantName\':s,\'occupantAge\':12}',7),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':SSN15,\'occupantName\':Tarub,\'occupantAge\':117}',7),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':Tarunb,\'occupantName\':s,\'occupantAge\':12}',7),('OCCUPANT_DELETED',1,8,'{\'occuppantSSN\':SSN15,\'occupantName\':Tarub,\'occupantAge\':117}',7),('OCCUPANT_ADDED',1,8,'{\'occuppantSSN\':SSN17,\'occupantName\':Tarub,\'occupantAge\':13}',7),('BOOKING_CREATED',8,8,'roomNo:2',1),('CHECKED_IN',8,8,'{roomNo:2,checkedInByStaffId:1}',1),('BOOKING_CREATED',9,8,'roomNo:5',1),('CHECKED_IN',9,8,'{roomNo:5,checkedInByStaffId:1}',1),('BOOKING_UPDATED',9,8,'{\'roomNo\':5,\'startDate\':2022-12-06 00:00:00,\'endDate\':2022-12-06 00:00:00}',1),('CHECKED_OUT',9,8,'{roomNo:5,checkedOutByStaffId:1}',1);
 /*!40000 ALTER TABLE `booking_log` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -303,7 +302,7 @@ CREATE TABLE `hotel` (
 
 LOCK TABLES `hotel` WRITE;
 /*!40000 ALTER TABLE `hotel` DISABLE KEYS */;
-INSERT INTO `hotel` VALUES (1,'Hotel Plaza','Symphony Street','Truro','MA','02115',4.75,'+1 656-334-6296','plaza@hmz.com'),(2,'Hotel Banquet','Harrison Street','Truro','MA','02115',0,'+1 616-334-6296','banquet@hmz.com');
+INSERT INTO `hotel` VALUES (1,'Hotel Plaza','Symphony Street','Truro','MA','02115',3,'+1 656-334-6296','plaza@hmz.com'),(2,'Hotel Banquet','Harrison Street','Truro','MA','02115',0,'+1 616-334-6296','banquet@hmz.com');
 /*!40000 ALTER TABLE `hotel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -344,8 +343,8 @@ CREATE TABLE `occupantsinorder` (
                                     `occuppantSSN` varchar(45) NOT NULL,
                                     PRIMARY KEY (`bookingId`,`occuppantSSN`),
                                     KEY `occupant_ssn_idx` (`occuppantSSN`),
-                                    CONSTRAINT `booking_id` FOREIGN KEY (`bookingId`) REFERENCES `booking` (`bookingId`),
-                                    CONSTRAINT `occupant_ssn` FOREIGN KEY (`occuppantSSN`) REFERENCES `occupant` (`ssn`)
+                                    CONSTRAINT `booking_id` FOREIGN KEY (`bookingId`) REFERENCES `booking` (`bookingId`) ON DELETE CASCADE ON UPDATE CASCADE,
+                                    CONSTRAINT `occupant_ssn` FOREIGN KEY (`occuppantSSN`) REFERENCES `occupant` (`ssn`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -452,14 +451,14 @@ DROP TABLE IF EXISTS `rooms`;
 CREATE TABLE `rooms` (
                          `roomNo` int NOT NULL,
                          `hotelId` int NOT NULL,
-                         `category` enum('Deluxe','Ultra','Suite') NOT NULL,
+                         `category` enum('Deluxe','Ultra','Suite') DEFAULT NULL,
                          `floor` int NOT NULL,
                          `capacity` int NOT NULL,
                          PRIMARY KEY (`roomNo`,`hotelId`),
                          KEY `hotel_fk_idx` (`hotelId`),
                          KEY `category_fk_idx` (`category`),
-                         CONSTRAINT `category_fk` FOREIGN KEY (`category`) REFERENCES `roomcategory` (`category`),
-                         CONSTRAINT `hotel_fk` FOREIGN KEY (`hotelId`) REFERENCES `hotel` (`id`)
+                         CONSTRAINT `category_fk` FOREIGN KEY (`category`) REFERENCES `roomcategory` (`category`) ON DELETE SET NULL ON UPDATE SET NULL,
+                         CONSTRAINT `hotel_fk` FOREIGN KEY (`hotelId`) REFERENCES `hotel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -493,8 +492,8 @@ CREATE TABLE `staff` (
                          PRIMARY KEY (`staffid`),
                          UNIQUE KEY `ssn_UNIQUE` (`ssn`),
                          KEY `staff_fk_hotel_idx` (`hotelid`),
-                         CONSTRAINT `staff_fk_hotel` FOREIGN KEY (`hotelid`) REFERENCES `hotel` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+                         CONSTRAINT `staff_fk_hotel` FOREIGN KEY (`hotelid`) REFERENCES `hotel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -503,7 +502,7 @@ CREATE TABLE `staff` (
 
 LOCK TABLES `staff` WRITE;
 /*!40000 ALTER TABLE `staff` DISABLE KEYS */;
-INSERT INTO `staff` VALUES (1,'Mandeep','+1767-287-4851','arun@hms.coom','ssn1',1,NULL,NULL,1),(2,'Ujwal','+1767-287-4851','arun@hms.coom','ssn2',1,NULL,NULL,2),(4,'Manoj','438389430','m@h.com','SSN78',0,'2022-01-01','2024-01-01',1),(5,'Henry','+18789924516','henry@gmail.com','SSn19',0,'2021-01-01','2025-01-01',2);
+INSERT INTO `staff` VALUES (1,'Mandeep','+1767-287-4851','arun@hms.coom','ssn1',1,NULL,NULL,1),(2,'Ujwal','+1767-287-4851','arun@hms.coom','ssn2',1,NULL,NULL,2),(4,'Manoj','438389430','m@h.com','SSN78',0,'2022-01-01','2024-01-01',1),(5,'Henry','+18789924516','henry@gmail.com','SSn19',0,'2021-01-01','2025-01-01',2),(6,'Logan','12901892','logan@j.com','SSN12',0,'2022-12-01','2025-12-01',1);
 /*!40000 ALTER TABLE `staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1222,4 +1221,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-06 17:36:59
+-- Dump completed on 2022-12-06 20:20:38
